@@ -17,7 +17,7 @@ object SupabaseService {
 
     private const val TAG = "SupabaseService"
     private const val SUPABASE_URL = "https://aqbzyeepanngwgbjwoqy.supabase.co"
-    private const val SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxYnp5ZWVwYW5uZ3dnYmp3b3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY2OTUwOTAsImV4cCI6MjA1MjI3MTA5MH0.QJKV3HXZzHM21cRslbMIJuEz_bSBzYeSHidjWzTaVLY"
+    private const val SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxYnp5ZWVwYW5uZ3dnYmp3b3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjc2NDUsImV4cCI6MjA4MzMwMzY0NX0.FAWlbkmKCgZaYx666Egtl-gu_TQoccl_PIKa8Td1SZU"
 
     var lastError: String? = null
         private set
