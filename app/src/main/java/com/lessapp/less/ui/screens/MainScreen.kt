@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lessapp.less.R
 import com.lessapp.less.data.model.*
+import com.lessapp.less.service.SupabaseService
 import com.lessapp.less.ui.FeedViewModel
 import com.lessapp.less.ui.components.*
 import kotlinx.coroutines.launch
@@ -102,9 +103,15 @@ fun MainScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
+                    val errorMsg = SupabaseService.lastError
                     EmptyState(
-                        message = if (ListMode.fromValue(settings.listMode) == ListMode.REVIEW)
-                            l10n.nothingToReview else l10n.noCards
+                        message = if (errorMsg != null) {
+                            "Erreur: $errorMsg"
+                        } else if (ListMode.fromValue(settings.listMode) == ListMode.REVIEW) {
+                            l10n.nothingToReview
+                        } else {
+                            l10n.noCards
+                        }
                     )
                 }
             } else {
