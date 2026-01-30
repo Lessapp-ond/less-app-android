@@ -48,7 +48,7 @@ fun MainScreen(
     val adError by viewModel.adError.collectAsState()
 
     val l10n = viewModel.l10n
-    val pagerState = rememberPagerState(pageCount = { feedItems.size })
+    val pagerState = rememberPagerState(pageCount = { maxOf(1, feedItems.size) })
     val scope = rememberCoroutineScope()
 
     // Load cards on first launch
@@ -59,9 +59,16 @@ fun MainScreen(
         }
     }
 
+    // Keep pager in bounds when feedItems changes
+    LaunchedEffect(feedItems.size) {
+        if (feedItems.isNotEmpty() && pagerState.currentPage >= feedItems.size) {
+            pagerState.scrollToPage(maxOf(0, feedItems.size - 1))
+        }
+    }
+
     // Track visible cards
     LaunchedEffect(pagerState.currentPage) {
-        if (pagerState.currentPage < feedItems.size) {
+        if (feedItems.isNotEmpty() && pagerState.currentPage < feedItems.size) {
             viewModel.cardBecameVisible(feedItems[pagerState.currentPage].id)
         }
     }

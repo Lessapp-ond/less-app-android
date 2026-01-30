@@ -19,7 +19,7 @@ class L10n(val lang: Lang) {
     val ok get() = t("OK", "OK", "OK")
 
     // Card Actions
-    val learned get() = t("J'ai appris", "I learned something", "Aprendí algo")
+    val learned get() = t("J'ai appris quelque chose", "I learned something", "Aprendí algo")
     val notUseful get() = t("Pas utile", "Not useful", "No útil")
     val reviewLater get() = t("À revoir", "Review later", "Repasar después")
     val report get() = t("Signaler", "Report", "Reportar")
