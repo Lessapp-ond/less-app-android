@@ -186,11 +186,12 @@ fun CardView(
                             border = ButtonDefaults.outlinedButtonBorder
                         ) {
                             Text(
-                                text = "•••",
-                                fontSize = 18.sp,
+                                text = "···",
+                                fontSize = 22.sp,
                                 fontWeight = FontWeight.Black,
                                 color = Color.Black,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+                                maxLines = 1,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                             )
                         }
                     }

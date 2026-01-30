@@ -361,31 +361,13 @@ fun Header(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Less button
-            Surface(
-                shape = RoundedCornerShape(14.dp),
-                color = Color.White,
-                border = ButtonDefaults.outlinedButtonBorder
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Less",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.Black
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "▼",
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.Black
-                    )
-                }
-            }
+            // Less logo
+            Image(
+                painter = painterResource(id = R.drawable.logo_less),
+                contentDescription = "Less",
+                modifier = Modifier.height(32.dp),
+                contentScale = ContentScale.FillHeight
+            )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 // Feed button
@@ -412,13 +394,12 @@ fun Header(
                     border = ButtonDefaults.outlinedButtonBorder
                 ) {
                     Text(
-                        text = "•••",
-                        fontSize = 18.sp,
+                        text = "···",
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Black,
                         color = Color.Black,
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                            .width(18.dp)
+                        maxLines = 1,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
             }
