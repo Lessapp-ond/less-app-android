@@ -494,7 +494,13 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun vibrate(effect: Int) {
-        val vibrator = getApplication<Application>().getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-        vibrator?.vibrate(VibrationEffect.createOneShot(50, effect))
+        try {
+            val vibrator = getApplication<Application>().getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            if (vibrator?.hasVibrator() == true) {
+                vibrator.vibrate(VibrationEffect.createPredefined(effect))
+            }
+        } catch (e: Exception) {
+            // Ignore vibration errors
+        }
     }
 }
