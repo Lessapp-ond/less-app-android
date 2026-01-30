@@ -41,6 +41,7 @@ object SupabaseService {
 
     suspend fun fetchCards(lang: Lang): List<Card> {
         return try {
+            println("SupabaseService: Fetching cards for lang=${lang.code}")
             val response = client.from("cards")
                 .select(columns = io.github.jan.supabase.postgrest.query.Columns.raw("*, card_translations(*)")) {
                     filter {
@@ -48,6 +49,7 @@ object SupabaseService {
                     }
                 }
                 .decodeList<CardResponse>()
+            println("SupabaseService: Got ${response.size} cards from API")
 
             response.mapNotNull { cardResponse ->
                 // Find translation for requested language
@@ -79,8 +81,11 @@ object SupabaseService {
                     bullets = bullets,
                     why = why
                 )
-            }.sortedByDescending { it.createdAt }
+            }.sortedByDescending { it.createdAt }.also {
+                println("SupabaseService: Returning ${it.size} sanitized cards")
+            }
         } catch (e: Exception) {
+            println("SupabaseService: Error fetching cards: ${e.message}")
             e.printStackTrace()
             emptyList()
         }

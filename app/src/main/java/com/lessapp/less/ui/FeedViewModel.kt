@@ -104,6 +104,9 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             _settings.value = settingsRepo.getSettings()
             _learnedCount.value = learnedRepo.count()
 
+            // Load cards on startup
+            loadCards()
+
             // Observe settings changes
             settingsRepo.settings.collect { newSettings ->
                 val langChanged = _settings.value.lang != newSettings.lang
