@@ -126,9 +126,9 @@ object SupabaseService {
                     bullets = bullets,
                     why = why
                 )
-            }.sortedByDescending { it.createdAt }
+            }.shuffled()
 
-            Log.d(TAG, "Returning ${cards.size} sanitized cards")
+            Log.d(TAG, "Returning ${cards.size} sanitized cards (shuffled)")
 
             if (cards.isEmpty() && response.isNotEmpty()) {
                 lastError = "Cards found but none passed sanitization"

@@ -4,9 +4,8 @@ import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -48,7 +47,7 @@ fun MainScreen(
     val adError by viewModel.adError.collectAsState()
 
     val l10n = viewModel.l10n
-    val listState = rememberLazyListState()
+    val pagerState = rememberPagerState(pageCount = { feedItems.size })
     val scope = rememberCoroutineScope()
 
     // Load cards on first launch
@@ -60,12 +59,9 @@ fun MainScreen(
     }
 
     // Track visible cards
-    LaunchedEffect(listState.firstVisibleItemIndex) {
-        val visibleItems = listState.layoutInfo.visibleItemsInfo
-        visibleItems.forEach { info ->
-            if (info.index < feedItems.size) {
-                viewModel.cardBecameVisible(feedItems[info.index].id)
-            }
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage < feedItems.size) {
+            viewModel.cardBecameVisible(feedItems[pagerState.currentPage].id)
         }
     }
 
@@ -115,16 +111,22 @@ fun MainScreen(
                     )
                 }
             } else {
-                // Feed
-                LazyColumn(
-                    state = listState,
+                // Feed - VerticalPager for one card at a time
+                VerticalPager(
+                    state = pagerState,
                     modifier = Modifier
                         .fillMaxSize()
                         .weight(1f),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    itemsIndexed(feedItems, key = { _, item -> item.id }) { index, item ->
+                    pageSpacing = 16.dp,
+                    key = { index -> feedItems.getOrNull(index)?.id ?: index }
+                ) { index ->
+                    val item = feedItems.getOrNull(index) ?: return@VerticalPager
+
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
                         when (item) {
                             is FeedItem.Content -> {
                                 var isNew by remember { mutableStateOf(false) }
