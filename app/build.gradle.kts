@@ -85,7 +85,6 @@ dependencies {
 
     // RevenueCat
     implementation("com.revenuecat.purchases:purchases:7.0.0")
-    implementation("com.revenuecat.purchases:purchases-ui:7.0.0")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
