@@ -42,7 +42,7 @@ object SupabaseService {
     suspend fun fetchCards(lang: Lang): List<Card> {
         return try {
             val response = client.from("cards")
-                .select {
+                .select(columns = io.github.jan.supabase.postgrest.query.Columns.raw("*, card_translations(*)")) {
                     filter {
                         eq("is_published", true)
                     }
