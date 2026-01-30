@@ -1,5 +1,6 @@
 package com.lessapp.less.service
 
+import android.util.Log
 import com.lessapp.less.data.model.Card
 import com.lessapp.less.data.model.Lang
 import io.github.jan.supabase.createSupabaseClient
@@ -41,7 +42,7 @@ object SupabaseService {
 
     suspend fun fetchCards(lang: Lang): List<Card> {
         return try {
-            println("SupabaseService: Fetching cards for lang=${lang.code}")
+            Log.d("SupabaseService", "Fetching cards for lang=${lang.code}")
             val response = client.from("cards")
                 .select(columns = io.github.jan.supabase.postgrest.query.Columns.raw("*, card_translations(*)")) {
                     filter {
@@ -49,7 +50,7 @@ object SupabaseService {
                     }
                 }
                 .decodeList<CardResponse>()
-            println("SupabaseService: Got ${response.size} cards from API")
+            Log.d("SupabaseService", "Got ${response.size} cards from API")
 
             response.mapNotNull { cardResponse ->
                 // Find translation for requested language
@@ -82,11 +83,10 @@ object SupabaseService {
                     why = why
                 )
             }.sortedByDescending { it.createdAt }.also {
-                println("SupabaseService: Returning ${it.size} sanitized cards")
+                Log.d("SupabaseService", "Returning ${it.size} sanitized cards")
             }
         } catch (e: Exception) {
-            println("SupabaseService: Error fetching cards: ${e.message}")
-            e.printStackTrace()
+            Log.e("SupabaseService", "Error fetching cards: ${e.message}", e)
             emptyList()
         }
     }
