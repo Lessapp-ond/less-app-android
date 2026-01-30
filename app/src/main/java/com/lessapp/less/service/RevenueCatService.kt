@@ -7,10 +7,10 @@ import com.revenuecat.purchases.models.StoreTransaction
 import com.revenuecat.purchases.Package
 import com.revenuecat.purchases.Offerings
 import com.revenuecat.purchases.PurchasesError
-import com.revenuecat.purchases.interfaces.GetStoreProductsCallback
 import com.revenuecat.purchases.interfaces.PurchaseCallback
 import com.revenuecat.purchases.interfaces.ReceiveOfferingsCallback
 import com.revenuecat.purchases.CustomerInfo
+import com.revenuecat.purchases.PurchaseParams
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -65,9 +65,9 @@ object RevenueCatService {
         if (!isConfigured) return false
 
         return suspendCancellableCoroutine { continuation ->
+            val purchaseParams = PurchaseParams.Builder(activity, pkg).build()
             Purchases.sharedInstance.purchase(
-                activity,
-                pkg,
+                purchaseParams,
                 object : PurchaseCallback {
                     override fun onCompleted(storeTransaction: StoreTransaction, customerInfo: CustomerInfo) {
                         println("RevenueCat: Purchase successful")
