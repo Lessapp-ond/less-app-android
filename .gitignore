@@ -13,3 +13,8 @@ local.properties
 *.apk
 *.aab
 google-services.json
+
+# Signing keys (NEVER commit these!)
+*.jks
+*.keystore
+keystore.properties
