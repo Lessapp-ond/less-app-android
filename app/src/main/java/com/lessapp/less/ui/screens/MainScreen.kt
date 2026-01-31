@@ -47,6 +47,9 @@ fun MainScreen(
     val learnedCount by viewModel.learnedCount.collectAsState()
     val adError by viewModel.adError.collectAsState()
 
+    val dailyProgress by viewModel.dailyProgress.collectAsState()
+    val isDailyComplete by viewModel.isDailyComplete.collectAsState()
+
     val l10n = viewModel.l10n
     val pagerState = rememberPagerState(pageCount = { maxOf(1, feedItems.size) })
     val scope = rememberCoroutineScope()
@@ -86,7 +89,10 @@ fun MainScreen(
             Header(
                 learnedCount = learnedCount,
                 listMode = ListMode.fromValue(settings.listMode),
+                dailyProgress = dailyProgress,
+                isDailyComplete = isDailyComplete,
                 onFeedClick = { viewModel.setListMode(ListMode.FEED) },
+                onDailyClick = { viewModel.enterDailyMode() },
                 onMenuClick = { viewModel.setShowMenu(true) }
             )
 
@@ -178,6 +184,12 @@ fun MainScreen(
                                         }
                                     },
                                     onDonate = { viewModel.openDonation() }
+                                )
+                            }
+                            is FeedItem.Opening -> {
+                                OpeningCardView(
+                                    card = item.card,
+                                    textScale = TextScale.fromValue(settings.textScale)
                                 )
                             }
                         }
@@ -347,7 +359,10 @@ fun MainScreen(
 fun Header(
     learnedCount: Int,
     listMode: ListMode,
+    dailyProgress: Int,
+    isDailyComplete: Boolean,
     onFeedClick: () -> Unit,
+    onDailyClick: () -> Unit,
     onMenuClick: () -> Unit
 ) {
     Column(
@@ -386,6 +401,22 @@ fun Header(
                     )
                 }
 
+                // Daily button
+                Surface(
+                    onClick = onDailyClick,
+                    shape = RoundedCornerShape(14.dp),
+                    color = if (listMode == ListMode.DAILY) Color.Black else Color.White,
+                    border = if (listMode != ListMode.DAILY) ButtonDefaults.outlinedButtonBorder else null
+                ) {
+                    Text(
+                        text = "Daily",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (listMode == ListMode.DAILY) Color.White else Color.Black,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+
                 // Menu button
                 Surface(
                     onClick = onMenuClick,
@@ -407,18 +438,114 @@ fun Header(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Stats
-        Text(
-            text = "$learnedCount cartes \"apprises\"",
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.Black.copy(alpha = 0.55f)
-        )
-        Text(
-            text = "Cache : à jour",
-            fontSize = 12.sp,
-            color = Color.Black.copy(alpha = 0.4f)
-        )
+        // Stats or Daily Progress
+        if (listMode == ListMode.DAILY) {
+            DailyProgressView(
+                progress = dailyProgress,
+                isComplete = isDailyComplete
+            )
+        } else {
+            Text(
+                text = "$learnedCount cartes \"apprises\"",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black.copy(alpha = 0.55f)
+            )
+            Text(
+                text = "Cache : à jour",
+                fontSize = 12.sp,
+                color = Color.Black.copy(alpha = 0.4f)
+            )
+        }
+    }
+}
+
+@Composable
+fun DailyProgressView(
+    progress: Int,
+    isComplete: Boolean
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 5 dots: 1 opening + 4 content cards
+        repeat(5) { index ->
+            val filled = if (index == 0) progress >= 0 else progress >= index
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(
+                        if (filled) Color.Black.copy(alpha = 0.6f)
+                        else Color.Black.copy(alpha = 0.15f)
+                    )
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        if (isComplete) {
+            Text(
+                text = "✓",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black.copy(alpha = 0.5f)
+            )
+        }
+    }
+}
+
+@Composable
+fun OpeningCardView(
+    card: OpeningCard,
+    textScale: TextScale
+) {
+    Surface(
+        shape = RoundedCornerShape(22.dp),
+        color = Color.White,
+        shadowElevation = 8.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 48.dp, horizontal = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Title
+            Text(
+                text = card.title,
+                fontSize = (26 * textScale.factor).sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Message
+            Text(
+                text = card.message,
+                fontSize = (17 * textScale.factor).sp,
+                color = Color.Black.copy(alpha = 0.75f),
+                lineHeight = (24 * textScale.factor).sp,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Footer
+            Text(
+                text = card.footer,
+                fontSize = (15 * textScale.factor).sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black.copy(alpha = 0.45f),
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+            )
+        }
     }
 }
 

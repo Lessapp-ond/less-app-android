@@ -30,6 +30,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private val seenRepo = SeenCardsRepository(application)
     private val supportTracker = SupportTracker(application)
     private val feedbackQueue = FeedbackQueue(application)
+    private val dailyRepo = DailyRepository(application)
 
     // Published State
     private val _feedItems = MutableStateFlow<List<FeedItem>>(emptyList())
@@ -91,6 +92,13 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private var uniqueViewedCount = 0
     private var sessionInjected = false
     private var viewedDurations: MutableMap<String, Int> = mutableMapOf()
+
+    // Daily State
+    private val _dailyProgress = MutableStateFlow(0)
+    val dailyProgress: StateFlow<Int> = _dailyProgress.asStateFlow()
+
+    private val _isDailyComplete = MutableStateFlow(false)
+    val isDailyComplete: StateFlow<Boolean> = _isDailyComplete.asStateFlow()
 
     // Scoring Constants
     private val reviewPinnedBoost = 40.0
@@ -205,11 +213,19 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         val listMode = ListMode.fromValue(_settings.value.listMode)
         val lang = Lang.fromCode(_settings.value.lang)
 
+        // Handle Daily mode separately
+        if (listMode == ListMode.DAILY) {
+            _feedItems.value = buildDailyFeed(lang)
+            updateDailyProgress()
+            return
+        }
+
         // Filter based on list mode
         val filtered = when (listMode) {
             ListMode.FEED -> allCards.filter { card ->
                 !learnedRepo.isLearned(card.id) && !unusefulRepo.isUnuseful(card.id)
             }
+            ListMode.DAILY -> emptyList() // Handled above
             ListMode.LEARNED -> allCards.filter { learnedRepo.isLearned(it.id) }
             ListMode.UNUSEFUL -> allCards.filter { unusefulRepo.isUnuseful(it.id) }
             ListMode.REVIEW -> allCards.filter { reviewRepo.isInReview(it.id) }
@@ -277,12 +293,107 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         return uniqueViewedCount >= 8
     }
 
+    // MARK: - Daily Mode
+    private suspend fun buildDailyFeed(lang: Lang): List<FeedItem> {
+        val items = mutableListOf<FeedItem>()
+
+        // 1. Opening card (only if not seen today)
+        if (!dailyRepo.hasSeenOpeningToday()) {
+            val opening = OpeningCard.forLang(lang)
+            items.add(FeedItem.Opening(opening))
+        }
+
+        // 2. Select 4 deterministic content cards
+        val dailyCards = selectDailyCards(allCards, 4)
+        for (card in dailyCards) {
+            items.add(FeedItem.Content(card))
+        }
+
+        // 3. Support card at the end
+        val systemCard = SystemCard.forLang(lang)
+        items.add(FeedItem.System(systemCard))
+
+        return items
+    }
+
+    private suspend fun selectDailyCards(cards: List<Card>, count: Int): List<Card> {
+        if (cards.isEmpty()) return emptyList()
+
+        // Filter out learned/unuseful cards
+        val available = cards.filter { card ->
+            !learnedRepo.isLearned(card.id) && !unusefulRepo.isUnuseful(card.id)
+        }
+
+        if (available.isEmpty()) return emptyList()
+
+        // Use seeded random for deterministic selection
+        val seed = dailySeed()
+        val random = java.util.Random(seed)
+
+        // Shuffle with seed and take first N
+        val shuffled = available.toMutableList()
+        shuffled.shuffle(random)
+
+        return shuffled.take(count)
+    }
+
+    private fun dailySeed(): Long {
+        // Create deterministic seed from today's date (UTC)
+        val dateString = java.time.LocalDate.now(java.time.ZoneOffset.UTC)
+            .format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+
+        // FNV-1a hash for better distribution
+        var hash: Long = -3750763034362895579L // 14695981039346656037 as signed
+        for (byte in dateString.toByteArray()) {
+            hash = hash xor byte.toLong()
+            hash *= 1099511628211L
+        }
+        return hash
+    }
+
+    private suspend fun updateDailyProgress() {
+        _dailyProgress.value = dailyRepo.viewedCount()
+        _isDailyComplete.value = dailyRepo.isCompleteToday()
+    }
+
+    fun enterDailyMode() {
+        viewModelScope.launch {
+            settingsRepo.updateListMode(ListMode.DAILY)
+            sessionOrderCache = emptyList()
+            rebuildFeed()
+            _currentIndex.value = 0
+        }
+    }
+
     // MARK: - Card Visibility
     fun cardBecameVisible(cardId: String) {
         viewModelScope.launch {
             val lang = Lang.fromCode(_settings.value.lang)
-            val item = _feedItems.value.find { it.id == cardId }
+            val listMode = ListMode.fromValue(_settings.value.listMode)
 
+            // Daily mode tracking
+            if (listMode == ListMode.DAILY) {
+                if (cardId == OpeningCard.ID) {
+                    dailyRepo.markOpeningSeen()
+                    if (dailyRepo.getDailyStartedToday() == null) {
+                        dailyRepo.markDailyStarted()
+                    }
+                } else if (cardId != "system_card") {
+                    dailyRepo.markCardViewed(cardId)
+                }
+
+                // Check if daily is complete (all 4 content cards viewed)
+                if (dailyRepo.viewedCount() >= 4 && !dailyRepo.isCompleteToday()) {
+                    dailyRepo.markDailyCompleted()
+                    _isDailyComplete.value = true
+                }
+
+                updateDailyProgress()
+                return@launch
+            }
+
+            // Track unique views (feed mode)
+            val item = _feedItems.value.find { it.id == cardId }
             if (item is FeedItem.Content && !seenRepo.isSeen(cardId, lang)) {
                 uniqueViewedCount++
                 seenRepo.markSeen(cardId, lang)

@@ -30,6 +30,12 @@ object PreferenceKeys {
     val SUPPORT_USED_DAY = stringPreferencesKey("support_used_day_v1")
     val FEEDBACK_QUEUE = stringPreferencesKey("feedback_queue_v1")
 
+    // Daily tracking
+    val DAILY_OPENING_SEEN = stringPreferencesKey("daily_opening_seen_v1")
+    val DAILY_STARTED_AT = stringPreferencesKey("daily_started_at_v1")
+    val DAILY_COMPLETED_AT = stringPreferencesKey("daily_completed_at_v1")
+    val DAILY_CARDS_VIEWED = stringPreferencesKey("daily_cards_viewed_v1")
+
     fun cardsCacheKey(lang: Lang) = stringPreferencesKey("cards_cache_${lang.code}")
     fun seenCardsKey(lang: Lang) = stringSetPreferencesKey("seen_cards_${lang.code}")
 }
@@ -313,5 +319,79 @@ class FeedbackQueue(private val context: Context) {
         context.dataStore.edit {
             it.remove(PreferenceKeys.FEEDBACK_QUEUE)
         }
+    }
+}
+
+// MARK: - Daily Store
+class DailyRepository(private val context: Context) {
+
+    private val todayStringUtc: String
+        get() = LocalDate.now(java.time.ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE)
+
+    // MARK: - Opening Card Tracking
+    suspend fun hasSeenOpeningToday(): Boolean {
+        val day = context.dataStore.data.first()[PreferenceKeys.DAILY_OPENING_SEEN]
+        return day == todayStringUtc
+    }
+
+    suspend fun markOpeningSeen() {
+        context.dataStore.edit {
+            it[PreferenceKeys.DAILY_OPENING_SEEN] = todayStringUtc
+        }
+    }
+
+    // MARK: - Daily Session Tracking
+    suspend fun getDailyStartedToday(): String? {
+        val key = stringPreferencesKey("daily_started_at_$todayStringUtc")
+        return context.dataStore.data.first()[key]
+    }
+
+    suspend fun markDailyStarted() {
+        val key = stringPreferencesKey("daily_started_at_$todayStringUtc")
+        val now = Instant.now().toString()
+        context.dataStore.edit {
+            it[key] = now
+        }
+    }
+
+    suspend fun getDailyCompletedToday(): String? {
+        val key = stringPreferencesKey("daily_completed_at_$todayStringUtc")
+        return context.dataStore.data.first()[key]
+    }
+
+    suspend fun markDailyCompleted() {
+        val key = stringPreferencesKey("daily_completed_at_$todayStringUtc")
+        val now = Instant.now().toString()
+        context.dataStore.edit {
+            it[key] = now
+        }
+    }
+
+    suspend fun isCompleteToday(): Boolean {
+        return getDailyCompletedToday() != null
+    }
+
+    // MARK: - Cards Viewed in Daily Session
+    suspend fun getViewedCardsToday(): Set<String> {
+        val key = stringPreferencesKey("daily_cards_viewed_$todayStringUtc")
+        val jsonStr = context.dataStore.data.first()[key] ?: return emptySet()
+        return try {
+            json.decodeFromString<Set<String>>(jsonStr)
+        } catch (e: Exception) {
+            emptySet()
+        }
+    }
+
+    suspend fun markCardViewed(cardId: String) {
+        val key = stringPreferencesKey("daily_cards_viewed_$todayStringUtc")
+        val current = getViewedCardsToday().toMutableSet()
+        current.add(cardId)
+        context.dataStore.edit {
+            it[key] = json.encodeToString(current)
+        }
+    }
+
+    suspend fun viewedCount(): Int {
+        return getViewedCardsToday().size
     }
 }

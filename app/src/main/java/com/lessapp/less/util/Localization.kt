@@ -26,9 +26,13 @@ class L10n(val lang: Lang) {
 
     // List Modes
     val feed get() = t("Feed", "Feed", "Feed")
+    val daily get() = t("Daily", "Daily", "Daily")
     val learnedMode get() = t("Appris", "Learned", "Aprendido")
     val unusefulMode get() = t("Pas utile", "Not useful", "No útil")
     val review get() = t("À revoir", "Review", "Repasar")
+
+    // Daily Mode
+    val dailyComplete get() = t("Rituel terminé !", "Ritual complete!", "¡Ritual completado!")
 
     // Settings
     val language get() = t("Langue", "Language", "Idioma")

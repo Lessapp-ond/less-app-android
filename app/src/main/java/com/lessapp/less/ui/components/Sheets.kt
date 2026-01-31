@@ -54,6 +54,7 @@ fun MenuSheet(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ModeChip(l10n.feed, currentMode == ListMode.FEED) { onModeChange(ListMode.FEED) }
+            ModeChip(l10n.daily, currentMode == ListMode.DAILY) { onModeChange(ListMode.DAILY) }
             ModeChip(l10n.learnedMode, currentMode == ListMode.LEARNED) { onModeChange(ListMode.LEARNED) }
             ModeChip(l10n.unusefulMode, currentMode == ListMode.UNUSEFUL) { onModeChange(ListMode.UNUSEFUL) }
             ModeChip(l10n.review, currentMode == ListMode.REVIEW) { onModeChange(ListMode.REVIEW) }

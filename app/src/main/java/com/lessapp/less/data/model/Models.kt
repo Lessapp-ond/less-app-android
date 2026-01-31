@@ -132,6 +132,37 @@ data class SystemCard(
     }
 }
 
+// MARK: - Opening Card (Daily ritual)
+data class OpeningCard(
+    val title: String,
+    val message: String,
+    val footer: String
+) {
+    companion object {
+        const val ID = "daily_opening"
+
+        fun forLang(lang: Lang): OpeningCard {
+            return when (lang) {
+                Lang.FR -> OpeningCard(
+                    title = "Un moment pour toi",
+                    message = "5 cartes. Pas de score. Pas de pression.\n\nPrends quelques secondes pour te poser.\nCe qui compte, c'est d'être là.",
+                    footer = "Respire. Découvre. Avance."
+                )
+                Lang.EN -> OpeningCard(
+                    title = "A moment for you",
+                    message = "5 cards. No score. No pressure.\n\nTake a few seconds to settle in.\nWhat matters is being here.",
+                    footer = "Breathe. Discover. Move forward."
+                )
+                Lang.ES -> OpeningCard(
+                    title = "Un momento para ti",
+                    message = "5 tarjetas. Sin puntuación. Sin presión.\n\nTómate unos segundos para asentarte.\nLo que importa es estar aquí.",
+                    footer = "Respira. Descubre. Avanza."
+                )
+            }
+        }
+    }
+}
+
 // MARK: - Feed Item
 sealed class FeedItem {
     abstract val id: String
@@ -142,6 +173,10 @@ sealed class FeedItem {
 
     data class System(val card: SystemCard) : FeedItem() {
         override val id: String get() = "system_card"
+    }
+
+    data class Opening(val card: OpeningCard) : FeedItem() {
+        override val id: String get() = OpeningCard.ID
     }
 }
 
@@ -225,6 +260,7 @@ data class UISettings(
 // MARK: - List Mode
 enum class ListMode(val value: String) {
     FEED("feed"),
+    DAILY("daily"),
     LEARNED("learned"),
     UNUSEFUL("unuseful"),
     REVIEW("review");
