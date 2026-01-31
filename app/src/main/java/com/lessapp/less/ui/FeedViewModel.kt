@@ -100,6 +100,8 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private val _isDailyComplete = MutableStateFlow(false)
     val isDailyComplete: StateFlow<Boolean> = _isDailyComplete.asStateFlow()
 
+    private var dailySessionViewedIds: MutableSet<String> = mutableSetOf() // Track views in current session only
+
     // Scoring Constants
     private val reviewPinnedBoost = 40.0
     private val reviewDueBoost = 260.0
@@ -326,12 +328,15 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
         if (available.isEmpty()) return emptyList()
 
+        // Sort by ID first for consistent base order (not affected by feed shuffle)
+        val sorted = available.sortedBy { it.id }
+
         // Use seeded random for deterministic selection
         val seed = dailySeed()
         val random = java.util.Random(seed)
 
         // Shuffle with seed and take first N
-        val shuffled = available.toMutableList()
+        val shuffled = sorted.toMutableList()
         shuffled.shuffle(random)
 
         return shuffled.take(count)
@@ -352,14 +357,24 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun updateDailyProgress() {
-        _dailyProgress.value = dailyRepo.viewedCount()
-        _isDailyComplete.value = dailyRepo.isCompleteToday()
+        // Progress is now tracked via dailySessionViewedIds in cardBecameVisible
+        // This is kept for compatibility but may be called during mode switches
+        val listMode = ListMode.fromValue(_settings.value.listMode)
+        if (listMode == ListMode.DAILY) {
+            _isDailyComplete.value = dailyRepo.isCompleteToday()
+        }
     }
 
     fun enterDailyMode() {
         viewModelScope.launch {
             settingsRepo.updateListMode(ListMode.DAILY)
             sessionOrderCache = emptyList()
+
+            // Reset session tracking
+            dailySessionViewedIds.clear()
+            _dailyProgress.value = 0
+            _isDailyComplete.value = dailyRepo.isCompleteToday() // Check if already completed today
+
             rebuildFeed()
             _currentIndex.value = 0
         }
@@ -379,16 +394,23 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                         dailyRepo.markDailyStarted()
                     }
                 } else if (cardId != "system_card") {
-                    dailyRepo.markCardViewed(cardId)
+                    // Track in current session AND persist
+                    if (!dailySessionViewedIds.contains(cardId)) {
+                        dailySessionViewedIds.add(cardId)
+                        dailyRepo.markCardViewed(cardId)
+                    }
                 }
 
-                // Check if daily is complete (all 4 content cards viewed)
-                if (dailyRepo.viewedCount() >= 4 && !dailyRepo.isCompleteToday()) {
+                // Update progress based on session views (not persisted count)
+                val sessionContentViews = dailySessionViewedIds.size
+                _dailyProgress.value = sessionContentViews
+
+                // Check if daily is complete (all 4 content cards viewed in THIS session)
+                if (sessionContentViews >= 4 && !_isDailyComplete.value) {
                     dailyRepo.markDailyCompleted()
                     _isDailyComplete.value = true
                 }
 
-                updateDailyProgress()
                 return@launch
             }
 

@@ -510,41 +510,46 @@ fun OpeningCardView(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 48.dp, horizontal = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 18.dp)
         ) {
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Title
+            // Title (styled like SystemCard)
             Text(
                 text = card.title,
-                fontSize = (26 * textScale.factor).sp,
+                fontSize = (22 * textScale.factor).sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(top = 20.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Message
+            // Message (multi-line)
             Text(
                 text = card.message,
-                fontSize = (17 * textScale.factor).sp,
-                color = Color.Black.copy(alpha = 0.75f),
+                fontSize = (16 * textScale.factor).sp,
+                color = Color.Black.copy(alpha = 0.82f),
                 lineHeight = (24 * textScale.factor).sp,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(top = 12.dp)
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Footer
-            Text(
-                text = card.footer,
-                fontSize = (15 * textScale.factor).sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Black.copy(alpha = 0.45f),
-                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-            )
+            // Footer with emoji (styled like "why" in SystemCard)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 24.dp)
+            ) {
+                Text(
+                    text = "🌱",
+                    fontSize = (16 * textScale.factor).sp
+                )
+                Text(
+                    text = card.footer,
+                    fontSize = (14 * textScale.factor).sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black.copy(alpha = 0.55f),
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                )
+            }
         }
     }
 }
