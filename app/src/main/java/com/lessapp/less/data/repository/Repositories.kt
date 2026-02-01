@@ -209,6 +209,11 @@ class SettingsRepository(private val context: Context) {
         save(current.copy(gesturesEnabled = !current.gesturesEnabled))
     }
 
+    suspend fun toggleDarkMode() {
+        val current = getSettings()
+        save(current.copy(darkMode = !current.darkMode))
+    }
+
     suspend fun markHelpSeen() {
         val current = getSettings()
         save(current.copy(helpSeen = true))

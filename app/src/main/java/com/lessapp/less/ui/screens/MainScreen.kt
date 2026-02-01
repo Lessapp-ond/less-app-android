@@ -26,6 +26,7 @@ import com.lessapp.less.data.model.*
 import com.lessapp.less.service.SupabaseService
 import com.lessapp.less.ui.FeedViewModel
 import com.lessapp.less.ui.components.*
+import com.lessapp.less.ui.theme.AppColors
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -55,6 +56,7 @@ fun MainScreen(
     val l10n = viewModel.l10n
     val pagerState = rememberPagerState(pageCount = { maxOf(1, feedItems.size) })
     val scope = rememberCoroutineScope()
+    val colors = AppColors.forDarkMode(settings.darkMode)
 
     // Load cards on first launch
     LaunchedEffect(Unit) {
@@ -90,7 +92,7 @@ fun MainScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF5F5F5))
+                .background(colors.background)
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -100,6 +102,7 @@ fun MainScreen(
                 listMode = ListMode.fromValue(settings.listMode),
                 dailyProgress = dailyProgress,
                 isDailyComplete = isDailyComplete,
+                colors = colors,
                 onFeedClick = { viewModel.setListMode(ListMode.FEED) },
                 onDailyClick = { viewModel.enterDailyMode() },
                 onMenuClick = { viewModel.setShowMenu(true) }
@@ -114,7 +117,7 @@ fun MainScreen(
                         .padding(horizontal = 16.dp),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    CardSkeleton()
+                    CardSkeleton(isDark = settings.darkMode)
                 }
             } else if (feedItems.isEmpty()) {
                 // Empty state
@@ -130,7 +133,8 @@ fun MainScreen(
                             l10n.nothingToReview
                         } else {
                             l10n.noCards
-                        }
+                        },
+                        isDark = settings.darkMode
                     )
                 }
             } else {
@@ -175,6 +179,7 @@ fun MainScreen(
                                     focusMode = settings.focusMode,
                                     textScale = TextScale.fromValue(settings.textScale),
                                     gesturesEnabled = settings.gesturesEnabled,
+                                    isDark = settings.darkMode,
                                     l10n = l10n,
                                     onLearnedClick = { viewModel.toggleLearned(item.card.id) },
                                     onMenuClick = {
@@ -189,6 +194,7 @@ fun MainScreen(
                                 SystemCardView(
                                     card = item.card,
                                     textScale = TextScale.fromValue(settings.textScale),
+                                    isDark = settings.darkMode,
                                     onWatchVideo = {
                                         scope.launch {
                                             viewModel.watchVideo(activity)
@@ -200,7 +206,8 @@ fun MainScreen(
                             is FeedItem.Opening -> {
                                 OpeningCardView(
                                     card = item.card,
-                                    textScale = TextScale.fromValue(settings.textScale)
+                                    textScale = TextScale.fromValue(settings.textScale),
+                                    isDark = settings.darkMode
                                 )
                             }
                         }
@@ -219,7 +226,7 @@ fun MainScreen(
                 Text(
                     text = "▼",
                     fontSize = 24.sp,
-                    color = Color.Black.copy(alpha = 0.35f)
+                    color = colors.textPrimary.copy(alpha = 0.35f)
                 )
             }
         }
@@ -260,6 +267,7 @@ fun MainScreen(
                 onToggleFocus = { viewModel.toggleFocus() },
                 onToggleContinuous = { viewModel.toggleContinuous() },
                 onToggleGestures = { viewModel.toggleGestures() },
+                onToggleDarkMode = { viewModel.toggleDarkMode() },
                 onHelpClick = {
                     viewModel.setShowMenu(false)
                     viewModel.setShowHelp(true)
@@ -381,6 +389,7 @@ fun Header(
     listMode: ListMode,
     dailyProgress: Int,
     isDailyComplete: Boolean,
+    colors: AppColors,
     onFeedClick: () -> Unit,
     onDailyClick: () -> Unit,
     onMenuClick: () -> Unit
@@ -409,14 +418,14 @@ fun Header(
                 Surface(
                     onClick = onFeedClick,
                     shape = RoundedCornerShape(14.dp),
-                    color = if (listMode == ListMode.FEED) Color.Black else Color.White,
+                    color = if (listMode == ListMode.FEED) colors.buttonBackgroundActive else colors.buttonBackground,
                     border = if (listMode != ListMode.FEED) ButtonDefaults.outlinedButtonBorder else null
                 ) {
                     Text(
                         text = "Feed",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (listMode == ListMode.FEED) Color.White else Color.Black,
+                        color = if (listMode == ListMode.FEED) colors.buttonTextActive else colors.buttonText,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
@@ -425,14 +434,14 @@ fun Header(
                 Surface(
                     onClick = onDailyClick,
                     shape = RoundedCornerShape(14.dp),
-                    color = if (listMode == ListMode.DAILY) Color.Black else Color.White,
+                    color = if (listMode == ListMode.DAILY) colors.buttonBackgroundActive else colors.buttonBackground,
                     border = if (listMode != ListMode.DAILY) ButtonDefaults.outlinedButtonBorder else null
                 ) {
                     Text(
                         text = "Daily",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (listMode == ListMode.DAILY) Color.White else Color.Black,
+                        color = if (listMode == ListMode.DAILY) colors.buttonTextActive else colors.buttonText,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
@@ -441,14 +450,14 @@ fun Header(
                 Surface(
                     onClick = onMenuClick,
                     shape = RoundedCornerShape(17.dp),
-                    color = Color.White,
+                    color = colors.buttonBackground,
                     border = ButtonDefaults.outlinedButtonBorder
                 ) {
                     Text(
                         text = "···",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.Black,
+                        color = colors.buttonText,
                         maxLines = 1,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
@@ -462,19 +471,20 @@ fun Header(
         if (listMode == ListMode.DAILY) {
             DailyProgressView(
                 progress = dailyProgress,
-                isComplete = isDailyComplete
+                isComplete = isDailyComplete,
+                colors = colors
             )
         } else {
             Text(
                 text = "$learnedCount cartes \"apprises\"",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.Black.copy(alpha = 0.55f)
+                color = colors.textSecondary
             )
             Text(
                 text = "Cache : à jour",
                 fontSize = 12.sp,
-                color = Color.Black.copy(alpha = 0.4f)
+                color = colors.textTertiary
             )
         }
     }
@@ -483,7 +493,8 @@ fun Header(
 @Composable
 fun DailyProgressView(
     progress: Int,
-    isComplete: Boolean
+    isComplete: Boolean,
+    colors: AppColors
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -497,8 +508,8 @@ fun DailyProgressView(
                     .size(8.dp)
                     .clip(RoundedCornerShape(4.dp))
                     .background(
-                        if (filled) Color.Black.copy(alpha = 0.6f)
-                        else Color.Black.copy(alpha = 0.15f)
+                        if (filled) colors.textPrimary.copy(alpha = 0.6f)
+                        else colors.textPrimary.copy(alpha = 0.15f)
                     )
             )
         }
@@ -510,7 +521,7 @@ fun DailyProgressView(
                 text = "✓",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black.copy(alpha = 0.5f)
+                color = colors.textSecondary
             )
         }
     }
@@ -519,12 +530,15 @@ fun DailyProgressView(
 @Composable
 fun OpeningCardView(
     card: OpeningCard,
-    textScale: TextScale
+    textScale: TextScale,
+    isDark: Boolean = false
 ) {
+    val colors = AppColors.forDarkMode(isDark)
+
     Surface(
         shape = RoundedCornerShape(22.dp),
-        color = Color.White,
-        shadowElevation = 8.dp,
+        color = colors.cardBackground,
+        shadowElevation = if (isDark) 0.dp else 8.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
@@ -537,7 +551,7 @@ fun OpeningCardView(
                 text = card.title,
                 fontSize = (22 * textScale.factor).sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black,
+                color = colors.textPrimary,
                 modifier = Modifier.padding(top = 20.dp)
             )
 
@@ -545,7 +559,7 @@ fun OpeningCardView(
             Text(
                 text = card.message,
                 fontSize = (16 * textScale.factor).sp,
-                color = Color.Black.copy(alpha = 0.82f),
+                color = colors.textPrimary.copy(alpha = 0.82f),
                 lineHeight = (24 * textScale.factor).sp,
                 modifier = Modifier.padding(top = 12.dp)
             )
@@ -566,7 +580,7 @@ fun OpeningCardView(
                     text = card.footer,
                     fontSize = (14 * textScale.factor).sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.Black.copy(alpha = 0.55f),
+                    color = colors.textSecondary,
                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                 )
             }
@@ -575,7 +589,9 @@ fun OpeningCardView(
 }
 
 @Composable
-fun EmptyState(message: String) {
+fun EmptyState(message: String, isDark: Boolean = false) {
+    val colors = AppColors.forDarkMode(isDark)
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -587,7 +603,7 @@ fun EmptyState(message: String) {
         Text(
             text = message,
             fontSize = 16.sp,
-            color = Color.Black.copy(alpha = 0.5f)
+            color = colors.textSecondary
         )
     }
 }

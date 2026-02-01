@@ -254,7 +254,8 @@ data class UISettings(
     val continuousReading: Boolean = false,
     val gesturesEnabled: Boolean = true,
     val helpSeen: Boolean = false,
-    val gestureHintSeen: Boolean = false
+    val gestureHintSeen: Boolean = false,
+    val darkMode: Boolean = false
 )
 
 // MARK: - List Mode

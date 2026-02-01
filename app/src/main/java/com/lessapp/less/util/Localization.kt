@@ -40,6 +40,7 @@ class L10n(val lang: Lang) {
     val focus get() = t("Focus", "Focus", "Enfoque")
     val continuous get() = t("Continu", "Continuous", "Continuo")
     val gestures get() = t("Gestes", "Gestures", "Gestos")
+    val darkMode get() = t("Mode sombre", "Dark mode", "Modo oscuro")
     val help get() = t("Aide", "Help", "Ayuda")
 
     // Help

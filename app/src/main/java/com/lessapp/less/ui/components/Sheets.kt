@@ -28,6 +28,7 @@ fun MenuSheet(
     onToggleFocus: () -> Unit,
     onToggleContinuous: () -> Unit,
     onToggleGestures: () -> Unit,
+    onToggleDarkMode: () -> Unit,
     onHelpClick: () -> Unit,
     onClose: () -> Unit
 ) {
@@ -98,6 +99,22 @@ fun MenuSheet(
             ModeChip(l10n.focus, settings.focusMode) { onToggleFocus() }
             ModeChip(l10n.continuous, settings.continuousReading) { onToggleContinuous() }
             ModeChip(l10n.gestures, settings.gesturesEnabled) { onToggleGestures() }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Dark mode
+        Text(
+            text = l10n.darkMode,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Black.copy(alpha = 0.5f)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ModeChip("🌙", settings.darkMode) { onToggleDarkMode() }
         }
 
         Spacer(modifier = Modifier.height(20.dp))

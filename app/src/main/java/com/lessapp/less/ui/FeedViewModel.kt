@@ -598,6 +598,10 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { settingsRepo.toggleGestures() }
     }
 
+    fun toggleDarkMode() {
+        viewModelScope.launch { settingsRepo.toggleDarkMode() }
+    }
+
     fun markHelpSeen() {
         viewModelScope.launch { settingsRepo.markHelpSeen() }
     }

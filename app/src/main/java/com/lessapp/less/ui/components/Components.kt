@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lessapp.less.data.model.*
+import com.lessapp.less.ui.theme.AppColors
 import com.lessapp.less.util.L10n
 import kotlin.math.roundToInt
 
@@ -34,6 +35,7 @@ fun CardView(
     focusMode: Boolean,
     textScale: TextScale,
     gesturesEnabled: Boolean,
+    isDark: Boolean = false,
     l10n: L10n,
     onLearnedClick: () -> Unit,
     onMenuClick: () -> Unit,
@@ -42,6 +44,7 @@ fun CardView(
 ) {
     var offsetX by remember { mutableFloatStateOf(0f) }
     val scale = textScale.factor
+    val colors = AppColors.forDarkMode(isDark)
 
     Box(
         modifier = Modifier
@@ -82,9 +85,9 @@ fun CardView(
             modifier = Modifier
                 .fillMaxWidth()
                 .offset { IntOffset(offsetX.roundToInt(), 0) }
-                .shadow(6.dp, RoundedCornerShape(22.dp)),
+                .shadow(if (isDark) 0.dp else 6.dp, RoundedCornerShape(22.dp)),
             shape = RoundedCornerShape(22.dp),
-            color = Color.White
+            color = colors.cardBackground
         ) {
             Column(
                 modifier = Modifier.padding(20.dp)
@@ -93,13 +96,14 @@ fun CardView(
                 if (!focusMode && isNew) {
                     Surface(
                         shape = RoundedCornerShape(999.dp),
+                        color = colors.buttonBackground,
                         border = ButtonDefaults.outlinedButtonBorder
                     ) {
                         Text(
                             text = "Nouveau",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black.copy(alpha = 0.62f),
+                            color = colors.textSecondary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                         )
                     }
@@ -111,7 +115,7 @@ fun CardView(
                     text = card.title,
                     fontSize = (22 * scale).sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.Black,
+                    color = colors.textPrimary,
                     maxLines = 2
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -121,7 +125,7 @@ fun CardView(
                     text = card.hook,
                     fontSize = (16 * scale).sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.Black.copy(alpha = 0.78f),
+                    color = colors.textPrimary.copy(alpha = 0.78f),
                     maxLines = 2
                 )
                 Spacer(modifier = Modifier.height(14.dp))
@@ -131,7 +135,7 @@ fun CardView(
                     Text(
                         text = "• $bullet",
                         fontSize = (15 * scale).sp,
-                        color = Color.Black.copy(alpha = 0.82f),
+                        color = colors.textPrimary.copy(alpha = 0.82f),
                         maxLines = 2
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -143,13 +147,13 @@ fun CardView(
                     text = "💡 ${l10n.whyItMatters}",
                     fontSize = (14 * scale).sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.Black.copy(alpha = 0.78f)
+                    color = colors.textPrimary.copy(alpha = 0.78f)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "→ ${card.why}",
                     fontSize = (14 * scale).sp,
-                    color = Color.Black.copy(alpha = 0.7f),
+                    color = colors.textPrimary.copy(alpha = 0.7f),
                     maxLines = 3
                 )
                 Spacer(modifier = Modifier.height(14.dp))
@@ -165,8 +169,8 @@ fun CardView(
                             onClick = onLearnedClick,
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isLearned) Color.Black else Color.White,
-                                contentColor = if (isLearned) Color.White else Color.Black
+                                containerColor = if (isLearned) colors.buttonBackgroundActive else colors.buttonBackground,
+                                contentColor = if (isLearned) colors.buttonTextActive else colors.buttonText
                             ),
                             border = if (!isLearned) ButtonDefaults.outlinedButtonBorder else null,
                             shape = RoundedCornerShape(999.dp)
@@ -182,14 +186,14 @@ fun CardView(
                         Surface(
                             onClick = onMenuClick,
                             shape = RoundedCornerShape(22.dp),
-                            color = Color.White,
+                            color = colors.buttonBackground,
                             border = ButtonDefaults.outlinedButtonBorder
                         ) {
                             Text(
                                 text = "···",
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Black,
-                                color = Color.Black,
+                                color = colors.buttonText,
                                 maxLines = 1,
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                             )
@@ -206,22 +210,22 @@ fun CardView(
                         text = card.topic.uppercase(),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black.copy(alpha = 0.45f)
+                        color = colors.textTertiary
                     )
                     Text(
                         text = " · ",
-                        color = Color.Black.copy(alpha = 0.45f)
+                        color = colors.textTertiary
                     )
                     Text(
                         text = l10n.difficulty(card.difficulty),
                         fontSize = 12.sp,
-                        color = Color.Black.copy(alpha = 0.45f)
+                        color = colors.textTertiary
                     )
                     if (isInReview) {
                         Text(
                             text = " · à revoir${if (isReviewDue) " (due)" else ""}",
                             fontSize = 12.sp,
-                            color = if (isReviewDue) Color(0xFFFF9500) else Color.Black.copy(alpha = 0.45f)
+                            color = if (isReviewDue) Color(0xFFFF9500) else colors.textTertiary
                         )
                     }
                 }
@@ -235,24 +239,26 @@ fun CardView(
 fun SystemCardView(
     card: SystemCard,
     textScale: TextScale,
+    isDark: Boolean = false,
     onWatchVideo: () -> Unit,
     onDonate: () -> Unit
 ) {
     val scale = textScale.factor
+    val colors = AppColors.forDarkMode(isDark)
 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(6.dp, RoundedCornerShape(22.dp)),
+            .shadow(if (isDark) 0.dp else 6.dp, RoundedCornerShape(22.dp)),
         shape = RoundedCornerShape(22.dp),
-        color = Color.White
+        color = colors.cardBackground
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
                 text = card.title,
                 fontSize = (22 * scale).sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Black
+                color = colors.textPrimary
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -260,7 +266,7 @@ fun SystemCardView(
                 text = card.hook,
                 fontSize = (16 * scale).sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.Black.copy(alpha = 0.78f)
+                color = colors.textPrimary.copy(alpha = 0.78f)
             )
             Spacer(modifier = Modifier.height(14.dp))
 
@@ -268,7 +274,7 @@ fun SystemCardView(
                 Text(
                     text = "• $bullet",
                     fontSize = (15 * scale).sp,
-                    color = Color.Black.copy(alpha = 0.82f)
+                    color = colors.textPrimary.copy(alpha = 0.82f)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -278,13 +284,13 @@ fun SystemCardView(
                 text = "❤️ ${card.supportTitle}",
                 fontSize = (14 * scale).sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Black.copy(alpha = 0.78f)
+                color = colors.textPrimary.copy(alpha = 0.78f)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = card.supportDescription,
                 fontSize = (14 * scale).sp,
-                color = Color.Black.copy(alpha = 0.7f)
+                color = colors.textPrimary.copy(alpha = 0.7f)
             )
             Spacer(modifier = Modifier.height(14.dp))
 
@@ -296,8 +302,8 @@ fun SystemCardView(
                     onClick = onWatchVideo,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White
+                        containerColor = colors.buttonBackgroundActive,
+                        contentColor = colors.buttonTextActive
                     ),
                     shape = RoundedCornerShape(999.dp)
                 ) {
@@ -317,7 +323,7 @@ fun SystemCardView(
                         text = card.donateLabel,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        color = colors.buttonText
                     )
                 }
             }
@@ -326,7 +332,7 @@ fun SystemCardView(
             Text(
                 text = card.finePrint,
                 fontSize = 12.sp,
-                color = Color.Black.copy(alpha = 0.45f)
+                color = colors.textTertiary
             )
         }
     }
@@ -334,7 +340,8 @@ fun SystemCardView(
 
 // MARK: - Card Skeleton
 @Composable
-fun CardSkeleton() {
+fun CardSkeleton(isDark: Boolean = false) {
+    val colors = AppColors.forDarkMode(isDark)
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
     val shimmerOffset by infiniteTransition.animateFloat(
         initialValue = -200f,
@@ -347,7 +354,11 @@ fun CardSkeleton() {
     )
 
     val shimmerBrush = Brush.linearGradient(
-        colors = listOf(
+        colors = if (isDark) listOf(
+            Color(0xFF3A3A3C),
+            Color(0xFF4A4A4C),
+            Color(0xFF3A3A3C)
+        ) else listOf(
             Color(0xFFE0E0E0),
             Color(0xFFF5F5F5),
             Color(0xFFE0E0E0)
@@ -360,9 +371,9 @@ fun CardSkeleton() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 12.dp)
-            .shadow(6.dp, RoundedCornerShape(22.dp)),
+            .shadow(if (isDark) 0.dp else 6.dp, RoundedCornerShape(22.dp)),
         shape = RoundedCornerShape(22.dp),
-        color = Color.White
+        color = colors.cardBackground
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Box(
