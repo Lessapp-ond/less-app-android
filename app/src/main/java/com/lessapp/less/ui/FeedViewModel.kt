@@ -101,6 +101,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     val isDailyComplete: StateFlow<Boolean> = _isDailyComplete.asStateFlow()
 
     private var dailySessionViewedIds: MutableSet<String> = mutableSetOf() // Track views in current session only
+    private var hasShownOpeningThisSession: Boolean = false // Track if opening was shown in current app session
 
     // Scoring Constants
     private val reviewPinnedBoost = 40.0
@@ -299,14 +300,16 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun buildDailyFeed(lang: Lang): List<FeedItem> {
         val items = mutableListOf<FeedItem>()
 
-        // 1. Opening card (only if not seen today)
-        if (!dailyRepo.hasSeenOpeningToday()) {
+        // 1. Opening card - show if not yet shown in this app session
+        // (ensures it appears at least once when entering Daily mode)
+        if (!hasShownOpeningThisSession) {
             val opening = OpeningCard.forLang(lang)
             items.add(FeedItem.Opening(opening))
+            hasShownOpeningThisSession = true
         }
 
-        // 2. Select 4 deterministic content cards
-        val dailyCards = selectDailyCards(allCards, 4)
+        // 2. Select 4 deterministic content cards (different from feed order)
+        val dailyCards = selectDailyCards(allCards, 4, lang)
         for (card in dailyCards) {
             items.add(FeedItem.Content(card))
         }
@@ -318,7 +321,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         return items
     }
 
-    private suspend fun selectDailyCards(cards: List<Card>, count: Int): List<Card> {
+    private suspend fun selectDailyCards(cards: List<Card>, count: Int, lang: Lang): List<Card> {
         if (cards.isEmpty()) return emptyList()
 
         // Filter out learned/unuseful cards
@@ -328,24 +331,28 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
         if (available.isEmpty()) return emptyList()
 
-        // Sort by ID first for consistent base order (not affected by feed shuffle)
+        // Sort by ID for consistent base order (independent of feed shuffle)
         val sorted = available.sortedBy { it.id }
 
-        // Use seeded random for deterministic selection
-        val seed = dailySeed()
+        // Use seeded random with language for more variety
+        val seed = dailySeed(lang)
         val random = java.util.Random(seed)
 
-        // Shuffle with seed and take first N
+        // Shuffle completely with seed
         val shuffled = sorted.toMutableList()
         shuffled.shuffle(random)
 
-        return shuffled.take(count)
+        // Take cards from middle of shuffled array (not the start, to differ from feed)
+        val startIndex = if (shuffled.size > count * 2) count else 0
+        val endIndex = minOf(startIndex + count, shuffled.size)
+
+        return shuffled.subList(startIndex, endIndex)
     }
 
-    private fun dailySeed(): Long {
-        // Create deterministic seed from today's date (UTC)
+    private fun dailySeed(lang: Lang): Long {
+        // Create deterministic seed from today's date (UTC) + language
         val dateString = java.time.LocalDate.now(java.time.ZoneOffset.UTC)
-            .format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+            .format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE) + "_daily_" + lang.code
 
         // FNV-1a hash for better distribution
         var hash: Long = -3750763034362895579L // 14695981039346656037 as signed
@@ -370,10 +377,12 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             settingsRepo.updateListMode(ListMode.DAILY)
             sessionOrderCache = emptyList()
 
-            // Reset session tracking
+            // Reset session tracking - opening will show on first entry
             dailySessionViewedIds.clear()
             _dailyProgress.value = 0
             _isDailyComplete.value = dailyRepo.isCompleteToday() // Check if already completed today
+            // Note: hasShownOpeningThisSession is NOT reset here - it persists for the app session
+            // This ensures opening shows once per app launch when entering Daily
 
             rebuildFeed()
             _currentIndex.value = 0
