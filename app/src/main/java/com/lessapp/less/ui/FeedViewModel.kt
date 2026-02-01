@@ -101,7 +101,6 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     val isDailyComplete: StateFlow<Boolean> = _isDailyComplete.asStateFlow()
 
     private var dailySessionViewedIds: MutableSet<String> = mutableSetOf() // Track views in current session only
-    private var hasShownOpeningThisSession: Boolean = false // Track if opening was shown in current app session
 
     // Scoring Constants
     private val reviewPinnedBoost = 40.0
@@ -300,13 +299,9 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun buildDailyFeed(lang: Lang): List<FeedItem> {
         val items = mutableListOf<FeedItem>()
 
-        // 1. Opening card - show if not yet shown in this app session
-        // (ensures it appears at least once when entering Daily mode)
-        if (!hasShownOpeningThisSession) {
-            val opening = OpeningCard.forLang(lang)
-            items.add(FeedItem.Opening(opening))
-            hasShownOpeningThisSession = true
-        }
+        // 1. Opening card - ALWAYS show in Daily mode
+        val opening = OpeningCard.forLang(lang)
+        items.add(FeedItem.Opening(opening))
 
         // 2. Select 4 deterministic content cards (different from feed order)
         val dailyCards = selectDailyCards(allCards, 4, lang)
@@ -379,11 +374,10 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             settingsRepo.updateListMode(ListMode.DAILY)
             sessionOrderCache = emptyList()
 
-            // Reset ALL session tracking including opening card flag
+            // Reset session tracking
             dailySessionViewedIds.clear()
             _dailyProgress.value = 0
             _isDailyComplete.value = dailyRepo.isCompleteToday()
-            hasShownOpeningThisSession = false  // Reset so opening card shows every time
 
             rebuildFeed()
             _currentIndex.value = 0
