@@ -278,6 +278,15 @@ fun SystemCardView(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Why section
+            Text(
+                text = "💡 ${card.why}",
+                fontSize = (14 * scale).sp,
+                fontWeight = FontWeight.Medium,
+                color = colors.textPrimary.copy(alpha = 0.7f)
+            )
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
@@ -288,7 +297,7 @@ fun SystemCardView(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = card.supportDescription,
+                text = card.supportText,
                 fontSize = (14 * scale).sp,
                 color = colors.textPrimary.copy(alpha = 0.7f)
             )
@@ -308,7 +317,7 @@ fun SystemCardView(
                     shape = RoundedCornerShape(999.dp)
                 ) {
                     Text(
-                        text = card.watchVideoLabel,
+                        text = card.ctaVideo,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -320,20 +329,13 @@ fun SystemCardView(
                     shape = RoundedCornerShape(999.dp)
                 ) {
                     Text(
-                        text = card.donateLabel,
+                        text = card.ctaDonate,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = colors.buttonText
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Text(
-                text = card.finePrint,
-                fontSize = 12.sp,
-                color = colors.textTertiary
-            )
         }
     }
 }

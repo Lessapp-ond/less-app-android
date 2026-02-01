@@ -3,6 +3,7 @@ package com.lessapp.less.ui.screens
 import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.pager.VerticalPager
@@ -52,6 +53,7 @@ fun MainScreen(
     val isDailyComplete by viewModel.isDailyComplete.collectAsState()
     val showDailyCompletion by viewModel.showDailyCompletion.collectAsState()
     val pagerKey by viewModel.pagerKey.collectAsState()
+    val currentStreak by viewModel.currentStreak.collectAsState()
 
     val l10n = viewModel.l10n
     val pagerState = rememberPagerState(pageCount = { maxOf(1, feedItems.size) })
@@ -102,6 +104,7 @@ fun MainScreen(
                 listMode = ListMode.fromValue(settings.listMode),
                 dailyProgress = dailyProgress,
                 isDailyComplete = isDailyComplete,
+                currentStreak = currentStreak,
                 colors = colors,
                 onFeedClick = { viewModel.setListMode(ListMode.FEED) },
                 onDailyClick = { viewModel.enterDailyMode() },
@@ -248,6 +251,7 @@ fun MainScreen(
         if (showDailyCompletion) {
             DailyCompletionView(
                 message = l10n.dailyComplete,
+                streak = currentStreak,
                 onDismiss = { viewModel.dismissDailyCompletion() }
             )
         }
@@ -389,6 +393,7 @@ fun Header(
     listMode: ListMode,
     dailyProgress: Int,
     isDailyComplete: Boolean,
+    currentStreak: Int,
     colors: AppColors,
     onFeedClick: () -> Unit,
     onDailyClick: () -> Unit,
@@ -469,24 +474,70 @@ fun Header(
 
         // Stats or Daily Progress
         if (listMode == ListMode.DAILY) {
-            DailyProgressView(
-                progress = dailyProgress,
-                isComplete = isDailyComplete,
-                colors = colors
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                DailyProgressView(
+                    progress = dailyProgress,
+                    isComplete = isDailyComplete,
+                    colors = colors
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                if (currentStreak > 0) {
+                    StreakBadge(streak = currentStreak, colors = colors)
+                }
+            }
         } else {
-            Text(
-                text = "$learnedCount cartes \"apprises\"",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = colors.textSecondary
-            )
-            Text(
-                text = "Cache : à jour",
-                fontSize = 12.sp,
-                color = colors.textTertiary
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "$learnedCount cartes \"apprises\"",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.textSecondary
+                    )
+                    Text(
+                        text = "Cache : à jour",
+                        fontSize = 12.sp,
+                        color = colors.textTertiary
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                if (currentStreak > 0) {
+                    StreakBadge(streak = currentStreak, colors = colors)
+                }
+            }
         }
+    }
+}
+
+@Composable
+fun StreakBadge(
+    streak: Int,
+    colors: AppColors
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(colors.buttonBackground, RoundedCornerShape(12.dp))
+            .border(1.dp, colors.border, RoundedCornerShape(12.dp))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = "🔥",
+            fontSize = 14.sp
+        )
+        Text(
+            text = "$streak",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = colors.textPrimary
+        )
     }
 }
 

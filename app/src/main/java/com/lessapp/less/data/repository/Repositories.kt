@@ -400,3 +400,66 @@ class DailyRepository(private val context: Context) {
         return getViewedCardsToday().size
     }
 }
+
+// MARK: - Streak Repository
+class StreakRepository(private val context: Context) {
+
+    private val streakKey = stringPreferencesKey("streak_count_v1")
+    private val lastCompletionKey = stringPreferencesKey("streak_last_completion_v1")
+
+    private val todayStringUtc: String
+        get() = LocalDate.now(java.time.ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE)
+
+    private val yesterdayStringUtc: String
+        get() = LocalDate.now(java.time.ZoneOffset.UTC).minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE)
+
+    suspend fun getCurrentStreak(): Int {
+        return context.dataStore.data.first()[streakKey] ?: 0
+    }
+
+    private suspend fun getLastCompletionDate(): String? {
+        return context.dataStore.data.first()[lastCompletionKey]
+    }
+
+    suspend fun recordCompletion() {
+        val lastDate = getLastCompletionDate()
+        val today = todayStringUtc
+        val yesterday = yesterdayStringUtc
+
+        val newStreak = when {
+            lastDate == today -> {
+                // Already completed today - do nothing
+                return
+            }
+            lastDate == yesterday -> {
+                // Completed yesterday - increment streak
+                getCurrentStreak() + 1
+            }
+            else -> {
+                // Streak broken or first completion - start at 1
+                1
+            }
+        }
+
+        context.dataStore.edit {
+            it[streakKey] = newStreak
+            it[lastCompletionKey] = today
+        }
+    }
+
+    suspend fun checkStreakValidity(): Int {
+        val lastDate = getLastCompletionDate() ?: return 0
+        val today = todayStringUtc
+        val yesterday = yesterdayStringUtc
+
+        // If last completion was not today or yesterday, streak is broken
+        return if (lastDate != today && lastDate != yesterday) {
+            context.dataStore.edit {
+                it[streakKey] = 0
+            }
+            0
+        } else {
+            getCurrentStreak()
+        }
+    }
+}

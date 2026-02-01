@@ -35,9 +35,11 @@ data class Particle(
 @Composable
 fun DailyCompletionView(
     message: String,
+    streak: Int = 0,
     onDismiss: () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
+    var showStreak by remember { mutableStateOf(false) }
     val particles = remember {
         val colors = listOf(
             Color(0xFF4CAF50), // Green
@@ -86,10 +88,28 @@ fun DailyCompletionView(
         label = "textOffset"
     )
 
+    // Streak animation
+    val streakScale by animateFloatAsState(
+        targetValue = if (showStreak) 1f else 0.5f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "streakScale"
+    )
+
+    val streakAlpha by animateFloatAsState(
+        targetValue = if (showStreak) 1f else 0f,
+        animationSpec = tween(400, delayMillis = 500),
+        label = "streakAlpha"
+    )
+
     // Start animation on appear
     LaunchedEffect(Unit) {
         visible = true
-        delay(2500)
+        delay(500)
+        showStreak = true
+        delay(2000)
         onDismiss()
     }
 
@@ -183,6 +203,30 @@ fun DailyCompletionView(
                     .alpha(textAlpha)
                     .offset(y = textOffset.dp)
             )
+
+            // Streak badge
+            if (streak > 0) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .scale(streakScale)
+                        .alpha(streakAlpha)
+                        .background(Color(0xFFFF9800).copy(alpha = 0.8f), CircleShape)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = "🔥",
+                        fontSize = 20.sp
+                    )
+                    Text(
+                        text = "$streak jour${if (streak > 1) "s" else ""}",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
         }
     }
 }

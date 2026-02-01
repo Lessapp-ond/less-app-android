@@ -31,6 +31,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private val supportTracker = SupportTracker(application)
     private val feedbackQueue = FeedbackQueue(application)
     private val dailyRepo = DailyRepository(application)
+    private val streakRepo = StreakRepository(application)
 
     // Published State
     private val _feedItems = MutableStateFlow<List<FeedItem>>(emptyList())
@@ -108,6 +109,10 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     private var dailySessionViewedIds: MutableSet<String> = mutableSetOf() // Track views in current session only
 
+    // Streak
+    private val _currentStreak = MutableStateFlow(0)
+    val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
+
     // Scoring Constants
     private val reviewPinnedBoost = 40.0
     private val reviewDueBoost = 260.0
@@ -119,6 +124,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _settings.value = settingsRepo.getSettings()
             _learnedCount.value = learnedRepo.count()
+            _currentStreak.value = streakRepo.checkStreakValidity()
 
             // Load cards on startup
             loadCards()
@@ -419,6 +425,8 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                 // Check if daily is complete (all 4 content cards viewed in THIS session)
                 if (sessionContentViews >= 4 && !_isDailyComplete.value) {
                     dailyRepo.markDailyCompleted()
+                    streakRepo.recordCompletion()
+                    _currentStreak.value = streakRepo.getCurrentStreak()
                     _isDailyComplete.value = true
                     _showDailyCompletion.value = true // Trigger celebration animation
                 }

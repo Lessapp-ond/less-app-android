@@ -76,56 +76,53 @@ data class SystemCard(
     val title: String,
     val hook: String,
     val bullets: List<String>,
+    val why: String,
     val supportTitle: String,
-    val supportDescription: String,
-    val watchVideoLabel: String,
-    val donateLabel: String,
-    val finePrint: String
+    val supportText: String,
+    val ctaVideo: String,
+    val ctaDonate: String
 ) {
     companion object {
         fun forLang(lang: Lang): SystemCard {
             return when (lang) {
                 Lang.FR -> SystemCard(
-                    title = "Less reste gratuit",
-                    hook = "On croit au savoir accessible pour tous.",
+                    title = "Ton cerveau a fait sa part",
+                    hook = "Tu viens de parcourir plusieurs cartes. Prends une pause méritée.",
                     bullets = listOf(
-                        "Pas d'abonnement, pas de paywall",
-                        "Pas de pub intrusive",
-                        "Respectueux de votre temps"
+                        "1 carte = 1 micro-apprentissage",
+                        "Ton feed s'adapte à ta lecture"
                     ),
-                    supportTitle = "Soutenez-nous",
-                    supportDescription = "Regardez une courte pub ou faites un don pour nous aider.",
-                    watchVideoLabel = "Regarder une pub",
-                    donateLabel = "Faire un don",
-                    finePrint = "Merci de votre soutien !"
+                    why = "LESS est gratuit et sans compte. Pour continuer, tu peux nous soutenir.",
+                    supportTitle = "Soutenir LESS",
+                    supportText = "Aide-nous à garder l'app gratuite et sans pub intrusive.",
+                    ctaVideo = "Regarder une courte vidéo",
+                    ctaDonate = "Faire un don"
                 )
                 Lang.ES -> SystemCard(
-                    title = "Less sigue siendo gratis",
-                    hook = "Creemos en el conocimiento accesible para todos.",
+                    title = "Tu cerebro ya hizo su parte",
+                    hook = "Acabas de ver varias tarjetas. Toma un descanso merecido.",
                     bullets = listOf(
-                        "Sin suscripción, sin paywall",
-                        "Sin publicidad intrusiva",
-                        "Respetuoso con tu tiempo"
+                        "1 tarjeta = 1 micro-aprendizaje",
+                        "Tu feed se adapta a tu lectura"
                     ),
-                    supportTitle = "Apóyanos",
-                    supportDescription = "Mira un breve anuncio o haz una donación para ayudarnos.",
-                    watchVideoLabel = "Ver un anuncio",
-                    donateLabel = "Hacer una donación",
-                    finePrint = "¡Gracias por tu apoyo!"
+                    why = "LESS es gratis y sin cuenta. Para continuar, puedes apoyarnos.",
+                    supportTitle = "Apoyar LESS",
+                    supportText = "Ayúdanos a mantener la app gratis y sin publicidad intrusiva.",
+                    ctaVideo = "Ver un video corto",
+                    ctaDonate = "Hacer una donación"
                 )
                 Lang.EN -> SystemCard(
-                    title = "Less stays free",
-                    hook = "We believe in knowledge accessible to all.",
+                    title = "Your brain has done its part",
+                    hook = "You've just browsed several cards. Take a well-deserved break.",
                     bullets = listOf(
-                        "No subscription, no paywall",
-                        "No intrusive ads",
-                        "Respectful of your time"
+                        "1 card = 1 micro-learning",
+                        "Your feed adapts to your reading"
                     ),
-                    supportTitle = "Support us",
-                    supportDescription = "Watch a short ad or make a donation to help us.",
-                    watchVideoLabel = "Watch an ad",
-                    donateLabel = "Make a donation",
-                    finePrint = "Thank you for your support!"
+                    why = "LESS is free and account-free. To keep going, you can support us.",
+                    supportTitle = "Support LESS",
+                    supportText = "Help us keep the app free and without intrusive ads.",
+                    ctaVideo = "Watch a short video",
+                    ctaDonate = "Make a donation"
                 )
             }
         }
