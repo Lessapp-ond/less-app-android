@@ -100,6 +100,9 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private val _isDailyComplete = MutableStateFlow(false)
     val isDailyComplete: StateFlow<Boolean> = _isDailyComplete.asStateFlow()
 
+    private val _showDailyCompletion = MutableStateFlow(false)
+    val showDailyCompletion: StateFlow<Boolean> = _showDailyCompletion.asStateFlow()
+
     private val _pagerKey = MutableStateFlow(0)
     val pagerKey: StateFlow<Int> = _pagerKey.asStateFlow()
 
@@ -417,6 +420,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                 if (sessionContentViews >= 4 && !_isDailyComplete.value) {
                     dailyRepo.markDailyCompleted()
                     _isDailyComplete.value = true
+                    _showDailyCompletion.value = true // Trigger celebration animation
                 }
 
                 return@launch
@@ -558,6 +562,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     fun setShowCardMenu(show: Boolean) { _showCardMenu.value = show }
     fun setShowFeedback(show: Boolean) { _showFeedback.value = show }
     fun setShowDonation(show: Boolean) { _showDonation.value = show }
+    fun dismissDailyCompletion() { _showDailyCompletion.value = false }
     fun setSelectedCardId(cardId: String?) { _selectedCardId.value = cardId }
     fun clearAdError() { _adError.value = null }
 

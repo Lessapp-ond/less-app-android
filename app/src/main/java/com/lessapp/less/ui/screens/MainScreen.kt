@@ -49,6 +49,7 @@ fun MainScreen(
 
     val dailyProgress by viewModel.dailyProgress.collectAsState()
     val isDailyComplete by viewModel.isDailyComplete.collectAsState()
+    val showDailyCompletion by viewModel.showDailyCompletion.collectAsState()
     val pagerKey by viewModel.pagerKey.collectAsState()
 
     val l10n = viewModel.l10n
@@ -233,6 +234,14 @@ fun MainScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 100.dp)
+            )
+        }
+
+        // Daily Completion Celebration
+        if (showDailyCompletion) {
+            DailyCompletionView(
+                message = l10n.dailyComplete,
+                onDismiss = { viewModel.dismissDailyCompletion() }
             )
         }
     }
