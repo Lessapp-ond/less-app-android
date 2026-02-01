@@ -100,6 +100,9 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private val _isDailyComplete = MutableStateFlow(false)
     val isDailyComplete: StateFlow<Boolean> = _isDailyComplete.asStateFlow()
 
+    private val _pagerKey = MutableStateFlow(0)
+    val pagerKey: StateFlow<Int> = _pagerKey.asStateFlow()
+
     private var dailySessionViewedIds: MutableSet<String> = mutableSetOf() // Track views in current session only
 
     // Scoring Constants
@@ -381,6 +384,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
             rebuildFeed()
             _currentIndex.value = 0
+            _pagerKey.value++ // Force Pager recreation to start at first item
         }
     }
 

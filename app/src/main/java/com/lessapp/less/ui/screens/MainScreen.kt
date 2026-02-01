@@ -49,6 +49,7 @@ fun MainScreen(
 
     val dailyProgress by viewModel.dailyProgress.collectAsState()
     val isDailyComplete by viewModel.isDailyComplete.collectAsState()
+    val pagerKey by viewModel.pagerKey.collectAsState()
 
     val l10n = viewModel.l10n
     val pagerState = rememberPagerState(pageCount = { maxOf(1, feedItems.size) })
@@ -133,15 +134,17 @@ fun MainScreen(
                 }
             } else {
                 // Feed - VerticalPager for one card at a time
-                VerticalPager(
-                    state = pagerState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                    pageSpacing = 16.dp,
-                    key = { index -> feedItems.getOrNull(index)?.id ?: index }
-                ) { index ->
+                // key() forces recreation when pagerKey changes (entering Daily mode)
+                key(pagerKey) {
+                    VerticalPager(
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                        pageSpacing = 16.dp,
+                        key = { index -> feedItems.getOrNull(index)?.id ?: index }
+                    ) { index ->
                     val item = feedItems.getOrNull(index) ?: return@VerticalPager
 
                     Box(
@@ -202,6 +205,7 @@ fun MainScreen(
                         }
                     }
                 }
+                } // end key(pagerKey)
             }
 
             // Triangle decoration
