@@ -379,12 +379,11 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             settingsRepo.updateListMode(ListMode.DAILY)
             sessionOrderCache = emptyList()
 
-            // Reset session tracking - opening will show on first entry
+            // Reset ALL session tracking including opening card flag
             dailySessionViewedIds.clear()
             _dailyProgress.value = 0
-            _isDailyComplete.value = dailyRepo.isCompleteToday() // Check if already completed today
-            // Note: hasShownOpeningThisSession is NOT reset here - it persists for the app session
-            // This ensures opening shows once per app launch when entering Daily
+            _isDailyComplete.value = dailyRepo.isCompleteToday()
+            hasShownOpeningThisSession = false  // Reset so opening card shows every time
 
             rebuildFeed()
             _currentIndex.value = 0
