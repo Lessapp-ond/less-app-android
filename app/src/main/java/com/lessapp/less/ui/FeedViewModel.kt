@@ -331,22 +331,24 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
         if (available.isEmpty()) return emptyList()
 
-        // Sort by ID for consistent base order (independent of feed shuffle)
+        // Sort by ID for consistent base order
         val sorted = available.sortedBy { it.id }
 
-        // Use seeded random with language for more variety
+        // Use daily-specific seed (different from feed which doesn't use seeded random)
         val seed = dailySeed(lang)
         val random = java.util.Random(seed)
 
-        // Shuffle completely with seed
+        // Multiple shuffle passes for more randomness
         val shuffled = sorted.toMutableList()
-        shuffled.shuffle(random)
+        repeat(3) {
+            shuffled.shuffle(random)
+        }
 
-        // Take cards from middle of shuffled array (not the start, to differ from feed)
-        val startIndex = if (shuffled.size > count * 2) count else 0
-        val endIndex = minOf(startIndex + count, shuffled.size)
+        // Reverse to make it even more different from any natural order
+        shuffled.reverse()
 
-        return shuffled.subList(startIndex, endIndex)
+        // Take first N cards
+        return shuffled.take(count)
     }
 
     private fun dailySeed(lang: Lang): Long {

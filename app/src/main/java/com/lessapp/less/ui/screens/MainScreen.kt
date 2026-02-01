@@ -76,6 +76,13 @@ fun MainScreen(
         }
     }
 
+    // Scroll to top when switching modes
+    LaunchedEffect(settings.listMode) {
+        if (feedItems.isNotEmpty()) {
+            pagerState.scrollToPage(0)
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // Background
         Box(
