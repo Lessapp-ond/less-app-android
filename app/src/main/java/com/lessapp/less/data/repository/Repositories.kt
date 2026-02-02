@@ -404,7 +404,7 @@ class DailyRepository(private val context: Context) {
 // MARK: - Streak Repository
 class StreakRepository(private val context: Context) {
 
-    private val streakKey = stringPreferencesKey("streak_count_v1")
+    private val streakKey = intPreferencesKey("streak_count_v1")
     private val lastCompletionKey = stringPreferencesKey("streak_last_completion_v1")
 
     private val todayStringUtc: String
