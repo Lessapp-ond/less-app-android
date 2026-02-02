@@ -2,6 +2,8 @@ package com.lessapp.less.service
 
 import android.app.Activity
 import android.content.Context
+import android.os.Bundle
+import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -42,7 +44,13 @@ object AdMobService {
         isLoading = true
 
         return suspendCancellableCoroutine { continuation ->
-            val adRequest = AdRequest.Builder().build()
+            // Disable personalized ads - user data not collected
+            val extras = Bundle()
+            extras.putString("npa", "1")
+
+            val adRequest = AdRequest.Builder()
+                .addNetworkExtrasBundle(AdMobAdapter::class.java, extras)
+                .build()
 
             RewardedAd.load(context, rewardedUnitId, adRequest, object : RewardedAdLoadCallback() {
                 override fun onAdFailedToLoad(error: LoadAdError) {
