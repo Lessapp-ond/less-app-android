@@ -21,3 +21,14 @@
 
 # RevenueCat
 -keep class com.revenuecat.purchases.** { *; }
+
+# Ktor
+-keep class io.ktor.** { *; }
+-dontwarn io.ktor.**
+
+# OkHttp
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
+# Kotlinx Coroutines
+-dontwarn kotlinx.coroutines.**
