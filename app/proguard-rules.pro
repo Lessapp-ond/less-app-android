@@ -32,3 +32,6 @@
 
 # Kotlinx Coroutines
 -dontwarn kotlinx.coroutines.**
+
+# SLF4J (used by Ktor)
+-dontwarn org.slf4j.**
