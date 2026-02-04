@@ -37,12 +37,12 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build Release Bundle
-        run: ./gradlew bundleRelease --no-daemon
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --no-daemon
 
-      - name: Upload AAB
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-bundle
-          path: app/build/outputs/bundle/release/app-release.aab
+          name: app-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
           retention-days: 30
