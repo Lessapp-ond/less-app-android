@@ -24,7 +24,7 @@ object AdMobService {
     // Set to false when app is published
     private const val TEST_MODE = true
 
-    private const val PRODUCTION_REWARDED_UNIT_ID = "ca-app-pub-6402656127562717/5765432109"
+    private const val PRODUCTION_REWARDED_UNIT_ID = "ca-app-pub-6402656127562717/8379571241"
     private const val TEST_REWARDED_UNIT_ID = "ca-app-pub-3940256099942544/5224354917" // Android test ID
 
     private val rewardedUnitId: String

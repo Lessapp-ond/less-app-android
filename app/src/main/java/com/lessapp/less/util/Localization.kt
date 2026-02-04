@@ -128,4 +128,10 @@ class L10n(val lang: Lang) {
     )
     val retry get() = t("Réessayer", "Retry", "Reintentar")
     val noOptionsAvailable get() = t("Aucune option disponible", "No options available", "Sin opciones disponibles")
+    val comingSoon get() = t("Bientôt disponible", "Coming soon", "Próximamente")
+    val comingSoonSubtitle get() = t(
+        "Cette fonctionnalité sera disponible dans une prochaine mise à jour.",
+        "This feature will be available in an upcoming update.",
+        "Esta función estará disponible en una próxima actualización."
+    )
 }

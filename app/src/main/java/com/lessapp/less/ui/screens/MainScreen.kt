@@ -365,7 +365,6 @@ fun MainScreen(
             onDismissRequest = { viewModel.setShowDonation(false) }
         ) {
             DonationSheet(
-                activity = activity,
                 l10n = l10n,
                 onClose = { viewModel.setShowDonation(false) }
             )

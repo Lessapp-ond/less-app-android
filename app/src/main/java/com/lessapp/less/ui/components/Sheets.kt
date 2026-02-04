@@ -1,6 +1,5 @@
 package com.lessapp.less.ui.components
 
-import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -12,10 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lessapp.less.data.model.*
-import com.lessapp.less.service.RevenueCatService
 import com.lessapp.less.util.L10n
-import com.revenuecat.purchases.Package
-import kotlinx.coroutines.launch
 
 // MARK: - Menu Sheet
 @Composable
@@ -379,35 +375,18 @@ fun FeedbackKindChip(
     }
 }
 
-// MARK: - Donation Sheet
+// MARK: - Donation Sheet (Coming Soon)
 @Composable
 fun DonationSheet(
-    activity: Activity,
     l10n: L10n,
     onClose: () -> Unit
 ) {
-    var offerings by remember { mutableStateOf<List<Package>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var purchaseInProgress by remember { mutableStateOf(false) }
-    var showSuccess by remember { mutableStateOf(false) }
-
-    val scope = rememberCoroutineScope()
-
-    LaunchedEffect(Unit) {
-        val result = RevenueCatService.fetchOfferings()
-        offerings = result?.current?.availablePackages ?: emptyList()
-        isLoading = false
-        if (offerings.isEmpty()) {
-            error = "No offerings available"
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .padding(bottom = 32.dp)
+            .padding(bottom = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -424,149 +403,29 @@ fun DonationSheet(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
-        Text(
-            text = l10n.supportSubtitle,
-            fontSize = 15.sp,
-            color = Color.Black.copy(alpha = 0.7f)
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (error != null && offerings.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("⚠️", fontSize = 40.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(l10n.noOptionsAvailable, color = Color.Black.copy(alpha = 0.5f))
-                }
-            }
-        } else {
-            offerings.forEach { pkg ->
-                DonationOption(
-                    title = pkg.product.title,
-                    description = pkg.product.description,
-                    price = pkg.product.price.formatted,
-                    isLoading = purchaseInProgress,
-                    onClick = {
-                        scope.launch {
-                            purchaseInProgress = true
-                            val success = RevenueCatService.purchase(activity, pkg)
-                            purchaseInProgress = false
-                            if (success) {
-                                showSuccess = true
-                            }
-                        }
-                    }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-        }
+        // Coming soon message
+        Text("❤️", fontSize = 60.sp)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(
-            onClick = {
-                scope.launch {
-                    purchaseInProgress = true
-                    RevenueCatService.restorePurchases()
-                    purchaseInProgress = false
-                }
-            },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Text(
-                text = l10n.restorePurchases,
-                color = Color.Black.copy(alpha = 0.5f),
-                fontSize = 13.sp
-            )
-        }
-    }
-
-    if (showSuccess) {
-        AlertDialog(
-            onDismissRequest = {
-                showSuccess = false
-                onClose()
-            },
-            title = { Text("Merci !") },
-            text = { Text(l10n.thankYou) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showSuccess = false
-                    onClose()
-                }) {
-                    Text(l10n.ok)
-                }
-            }
+        Text(
+            text = l10n.comingSoon,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Black.copy(alpha = 0.8f)
         )
-    }
-}
 
-@Composable
-fun DonationOption(
-    title: String,
-    description: String,
-    price: String,
-    isLoading: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = Color.White,
-        border = ButtonDefaults.outlinedButtonBorder,
-        enabled = !isLoading
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
-                )
-                if (description.isNotEmpty()) {
-                    Text(
-                        text = description,
-                        fontSize = 13.sp,
-                        color = Color.Black.copy(alpha = 0.6f),
-                        maxLines = 1
-                    )
-                }
-            }
-            if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp))
-            } else {
-                Text(
-                    text = price,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = l10n.comingSoonSubtitle,
+            fontSize = 14.sp,
+            color = Color.Black.copy(alpha = 0.5f),
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
