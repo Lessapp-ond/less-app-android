@@ -32,6 +32,7 @@ fun CardView(
     isLearned: Boolean,
     isInReview: Boolean,
     isReviewDue: Boolean,
+    isFavorite: Boolean,
     focusMode: Boolean,
     textScale: TextScale,
     gesturesEnabled: Boolean,
@@ -39,6 +40,7 @@ fun CardView(
     l10n: L10n,
     onLearnedClick: () -> Unit,
     onMenuClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
     onSwipeRight: () -> Unit,
     onSwipeLeft: () -> Unit
 ) {
@@ -204,6 +206,7 @@ fun CardView(
 
                 // Meta
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -226,6 +229,17 @@ fun CardView(
                             text = " · à revoir${if (isReviewDue) " (due)" else ""}",
                             fontSize = 12.sp,
                             color = if (isReviewDue) Color(0xFFFF9500) else colors.textTertiary
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    // Favorite button
+                    IconButton(
+                        onClick = onFavoriteClick,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Text(
+                            text = if (isFavorite) "❤️" else "🤍",
+                            fontSize = 18.sp
                         )
                     }
                 }

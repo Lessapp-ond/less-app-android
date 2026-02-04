@@ -26,6 +26,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private val learnedRepo = LearnedRepository(application)
     private val unusefulRepo = UnusefulRepository(application)
     private val reviewRepo = ReviewRepository(application)
+    private val favoritesRepo = FavoritesRepository(application)
     private val settingsRepo = SettingsRepository(application)
     private val cacheRepo = CardsCacheRepository(application)
     private val seenRepo = SeenCardsRepository(application)
@@ -244,6 +245,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             ListMode.LEARNED -> allCards.filter { learnedRepo.isLearned(it.id) }
             ListMode.UNUSEFUL -> allCards.filter { unusefulRepo.isUnuseful(it.id) }
             ListMode.REVIEW -> allCards.filter { reviewRepo.isInReview(it.id) }
+            ListMode.FAVORITES -> allCards.filter { favoritesRepo.isFavorite(it.id) }
         }
 
         // Score and sort
@@ -522,6 +524,22 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
             rebuildFeed()
         }
+    }
+
+    fun toggleFavorite(cardId: String) {
+        viewModelScope.launch {
+            favoritesRepo.toggle(cardId)
+            vibrate(VibrationEffect.EFFECT_TICK)
+
+            // Rebuild if in favorites mode to update the list
+            if (ListMode.fromValue(_settings.value.listMode) == ListMode.FAVORITES) {
+                rebuildFeed()
+            }
+        }
+    }
+
+    suspend fun isFavorite(cardId: String): Boolean {
+        return favoritesRepo.isFavorite(cardId)
     }
 
     fun submitFeedback(cardId: String, kind: FeedbackItem.Kind, message: String) {

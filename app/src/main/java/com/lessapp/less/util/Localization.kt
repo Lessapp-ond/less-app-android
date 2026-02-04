@@ -86,6 +86,7 @@ class L10n(val lang: Lang) {
     val slowConnection get() = t("Connexion lente...", "Slow connection...", "Conexión lenta...")
     val noCards get() = t("Aucune carte", "No cards", "Sin tarjetas")
     val nothingToReview get() = t("Rien à revoir", "Nothing to review", "Nada que repasar")
+    val noFavorites get() = t("Aucun favori", "No favorites", "Sin favoritos")
     val offline get() = t("Hors ligne", "Offline", "Sin conexión")
     val loading get() = t("Chargement...", "Loading...", "Cargando...")
 

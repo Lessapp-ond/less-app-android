@@ -57,6 +57,7 @@ fun MenuSheet(
             ModeChip(l10n.learnedMode, currentMode == ListMode.LEARNED) { onModeChange(ListMode.LEARNED) }
             ModeChip(l10n.unusefulMode, currentMode == ListMode.UNUSEFUL) { onModeChange(ListMode.UNUSEFUL) }
             ModeChip(l10n.review, currentMode == ListMode.REVIEW) { onModeChange(ListMode.REVIEW) }
+            ModeChip("❤️", currentMode == ListMode.FAVORITES) { onModeChange(ListMode.FAVORITES) }
         }
 
         Spacer(modifier = Modifier.height(20.dp))

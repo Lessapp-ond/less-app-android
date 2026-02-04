@@ -265,7 +265,8 @@ enum class ListMode(val value: String) {
     DAILY("daily"),
     LEARNED("learned"),
     UNUSEFUL("unuseful"),
-    REVIEW("review");
+    REVIEW("review"),
+    FAVORITES("favorites");
 
     companion object {
         fun fromValue(value: String): ListMode {

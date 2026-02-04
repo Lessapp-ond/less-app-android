@@ -24,6 +24,7 @@ private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 object PreferenceKeys {
     val LEARNED_IDS = stringSetPreferencesKey("learned_cards_v1")
     val UNUSEFUL_IDS = stringSetPreferencesKey("unuseful_cards_v1")
+    val FAVORITE_IDS = stringSetPreferencesKey("favorite_cards_v1")
     val REVIEWS = stringPreferencesKey("reviews_v1")
     val SETTINGS = stringPreferencesKey("settings_v1")
     val SUPPORT_INJECTED_DAY = stringPreferencesKey("support_injected_day_v1")
@@ -81,6 +82,30 @@ class UnusefulRepository(private val context: Context) {
         val newSet = if (isNowUnuseful) current + cardId else current - cardId
         context.dataStore.edit { it[PreferenceKeys.UNUSEFUL_IDS] = newSet }
         return isNowUnuseful
+    }
+}
+
+// MARK: - Favorites Store
+class FavoritesRepository(private val context: Context) {
+
+    val favoriteIds: Flow<Set<String>> = context.dataStore.data.map { prefs ->
+        prefs[PreferenceKeys.FAVORITE_IDS] ?: emptySet()
+    }
+
+    suspend fun isFavorite(cardId: String): Boolean {
+        return context.dataStore.data.first()[PreferenceKeys.FAVORITE_IDS]?.contains(cardId) ?: false
+    }
+
+    suspend fun toggle(cardId: String): Boolean {
+        val current = context.dataStore.data.first()[PreferenceKeys.FAVORITE_IDS] ?: emptySet()
+        val isNowFavorite = !current.contains(cardId)
+        val newSet = if (isNowFavorite) current + cardId else current - cardId
+        context.dataStore.edit { it[PreferenceKeys.FAVORITE_IDS] = newSet }
+        return isNowFavorite
+    }
+
+    suspend fun count(): Int {
+        return context.dataStore.data.first()[PreferenceKeys.FAVORITE_IDS]?.size ?: 0
     }
 }
 

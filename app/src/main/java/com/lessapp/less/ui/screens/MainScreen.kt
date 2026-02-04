@@ -129,11 +129,14 @@ fun MainScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     val errorMsg = SupabaseService.lastError
+                    val listMode = ListMode.fromValue(settings.listMode)
                     EmptyState(
                         message = if (errorMsg != null) {
                             "Erreur: $errorMsg"
-                        } else if (ListMode.fromValue(settings.listMode) == ListMode.REVIEW) {
+                        } else if (listMode == ListMode.REVIEW) {
                             l10n.nothingToReview
+                        } else if (listMode == ListMode.FAVORITES) {
+                            l10n.noFavorites
                         } else {
                             l10n.noCards
                         },
@@ -165,12 +168,14 @@ fun MainScreen(
                                 var isLearned by remember { mutableStateOf(false) }
                                 var isInReview by remember { mutableStateOf(false) }
                                 var isReviewDue by remember { mutableStateOf(false) }
+                                var isFavorite by remember { mutableStateOf(false) }
 
                                 LaunchedEffect(item.card.id) {
                                     isNew = viewModel.isNew(item.card.id)
                                     isLearned = viewModel.isLearned(item.card.id)
                                     isInReview = viewModel.isInReview(item.card.id)
                                     isReviewDue = viewModel.isReviewDue(item.card.id)
+                                    isFavorite = viewModel.isFavorite(item.card.id)
                                 }
 
                                 CardView(
@@ -179,6 +184,7 @@ fun MainScreen(
                                     isLearned = isLearned,
                                     isInReview = isInReview,
                                     isReviewDue = isReviewDue,
+                                    isFavorite = isFavorite,
                                     focusMode = settings.focusMode,
                                     textScale = TextScale.fromValue(settings.textScale),
                                     gesturesEnabled = settings.gesturesEnabled,
@@ -188,6 +194,10 @@ fun MainScreen(
                                     onMenuClick = {
                                         viewModel.setSelectedCardId(item.card.id)
                                         viewModel.setShowCardMenu(true)
+                                    },
+                                    onFavoriteClick = {
+                                        viewModel.toggleFavorite(item.card.id)
+                                        isFavorite = !isFavorite
                                     },
                                     onSwipeRight = { viewModel.toggleLearned(item.card.id) },
                                     onSwipeLeft = { viewModel.toggleUnuseful(item.card.id) }
