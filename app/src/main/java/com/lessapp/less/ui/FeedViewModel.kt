@@ -614,7 +614,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     // MARK: - Notifications
     fun toggleNotifications() {
         viewModelScope.launch {
-            val currentSettings = settingsRepo.settingsFlow.value
+            val currentSettings = settingsRepo.getSettings()
             if (!currentSettings.notificationsEnabled) {
                 // Enabling notifications
                 settingsRepo.setNotificationsEnabled(true)
@@ -636,7 +636,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     fun setNotificationTime(hour: Int, minute: Int) {
         viewModelScope.launch {
             settingsRepo.setNotificationTime(hour, minute)
-            val currentSettings = settingsRepo.settingsFlow.value
+            val currentSettings = settingsRepo.getSettings()
             if (currentSettings.notificationsEnabled) {
                 val lang = Lang.fromCode(currentSettings.lang)
                 NotificationService.scheduleDailyReminder(
