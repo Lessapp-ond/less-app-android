@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.lessapp.less.data.model.*
 import com.lessapp.less.data.repository.*
 import com.lessapp.less.service.AdMobService
+import com.lessapp.less.service.NotificationService
 import com.lessapp.less.service.SupabaseService
 import com.lessapp.less.util.L10n
 import kotlinx.coroutines.delay
@@ -608,6 +609,44 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     fun toggleDarkMode() {
         viewModelScope.launch { settingsRepo.toggleDarkMode() }
+    }
+
+    // MARK: - Notifications
+    fun toggleNotifications() {
+        viewModelScope.launch {
+            val currentSettings = settingsRepo.settingsFlow.value
+            if (!currentSettings.notificationsEnabled) {
+                // Enabling notifications
+                settingsRepo.setNotificationsEnabled(true)
+                val lang = Lang.fromCode(currentSettings.lang)
+                NotificationService.scheduleDailyReminder(
+                    getApplication(),
+                    currentSettings.notificationHour,
+                    currentSettings.notificationMinute,
+                    lang
+                )
+            } else {
+                // Disabling notifications
+                settingsRepo.setNotificationsEnabled(false)
+                NotificationService.cancelDailyReminder(getApplication())
+            }
+        }
+    }
+
+    fun setNotificationTime(hour: Int, minute: Int) {
+        viewModelScope.launch {
+            settingsRepo.setNotificationTime(hour, minute)
+            val currentSettings = settingsRepo.settingsFlow.value
+            if (currentSettings.notificationsEnabled) {
+                val lang = Lang.fromCode(currentSettings.lang)
+                NotificationService.scheduleDailyReminder(
+                    getApplication(),
+                    hour,
+                    minute,
+                    lang
+                )
+            }
+        }
     }
 
     fun markHelpSeen() {

@@ -2,6 +2,7 @@ package com.lessapp.less
 
 import android.app.Application
 import com.lessapp.less.service.AdMobService
+import com.lessapp.less.service.NotificationService
 import com.lessapp.less.service.RevenueCatService
 
 class LessApplication : Application() {
@@ -14,5 +15,8 @@ class LessApplication : Application() {
 
         // Initialize RevenueCat
         RevenueCatService.configure(this)
+
+        // Create notification channel
+        NotificationService.createNotificationChannel(this)
     }
 }

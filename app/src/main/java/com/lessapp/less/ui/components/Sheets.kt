@@ -25,6 +25,8 @@ fun MenuSheet(
     onToggleContinuous: () -> Unit,
     onToggleGestures: () -> Unit,
     onToggleDarkMode: () -> Unit,
+    onToggleNotifications: () -> Unit,
+    onNotificationTimeChange: (Int, Int) -> Unit,
     onHelpClick: () -> Unit,
     onClose: () -> Unit
 ) {
@@ -111,6 +113,34 @@ fun MenuSheet(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ModeChip("🌙", settings.darkMode) { onToggleDarkMode() }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Notifications
+        Text(
+            text = l10n.notifications,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Black.copy(alpha = 0.5f)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ModeChip(
+                if (settings.notificationsEnabled) l10n.notificationsOn else l10n.notificationsOff,
+                settings.notificationsEnabled
+            ) { onToggleNotifications() }
+
+            if (settings.notificationsEnabled) {
+                NotificationTimePicker(
+                    hour = settings.notificationHour,
+                    minute = settings.notificationMinute,
+                    onChange = onNotificationTimeChange
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -427,5 +457,113 @@ fun DonationSheet(
         )
 
         Spacer(modifier = Modifier.height(40.dp))
+    }
+}
+
+// MARK: - Notification Time Picker
+@Composable
+fun NotificationTimePicker(
+    hour: Int,
+    minute: Int,
+    onChange: (Int, Int) -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedHour by remember { mutableIntStateOf(hour) }
+    var selectedMinute by remember { mutableIntStateOf(minute) }
+
+    val timeString = String.format("%02d:%02d", hour, minute)
+
+    Surface(
+        onClick = { showDialog = true },
+        shape = RoundedCornerShape(14.dp),
+        color = Color.White,
+        border = ButtonDefaults.outlinedButtonBorder
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("🕐", fontSize = 12.sp)
+            Text(
+                text = timeString,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black
+            )
+        }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Heure du rappel") },
+            text = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Hour picker
+                    NumberPicker(
+                        value = selectedHour,
+                        range = 0..23,
+                        onValueChange = { selectedHour = it }
+                    )
+                    Text(
+                        text = ":",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                    // Minute picker
+                    NumberPicker(
+                        value = selectedMinute,
+                        range = 0..59,
+                        onValueChange = { selectedMinute = it }
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onChange(selectedHour, selectedMinute)
+                    showDialog = false
+                }) {
+                    Text("OK", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Annuler")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun NumberPicker(
+    value: Int,
+    range: IntRange,
+    onValueChange: (Int) -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        IconButton(
+            onClick = { if (value < range.last) onValueChange(value + 1) }
+        ) {
+            Text("▲", fontSize = 18.sp)
+        }
+        Text(
+            text = String.format("%02d", value),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+        IconButton(
+            onClick = { if (value > range.first) onValueChange(value - 1) }
+        ) {
+            Text("▼", fontSize = 18.sp)
+        }
     }
 }

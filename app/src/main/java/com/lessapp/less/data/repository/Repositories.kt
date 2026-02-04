@@ -218,6 +218,16 @@ class SettingsRepository(private val context: Context) {
         val current = getSettings()
         save(current.copy(helpSeen = true))
     }
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        val current = getSettings()
+        save(current.copy(notificationsEnabled = enabled))
+    }
+
+    suspend fun setNotificationTime(hour: Int, minute: Int) {
+        val current = getSettings()
+        save(current.copy(notificationHour = hour, notificationMinute = minute))
+    }
 }
 
 // MARK: - Cards Cache Store

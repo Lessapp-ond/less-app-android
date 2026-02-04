@@ -252,7 +252,11 @@ data class UISettings(
     val gesturesEnabled: Boolean = true,
     val helpSeen: Boolean = false,
     val gestureHintSeen: Boolean = false,
-    val darkMode: Boolean = false
+    val darkMode: Boolean = false,
+    // Notifications
+    val notificationsEnabled: Boolean = false,
+    val notificationHour: Int = 9,
+    val notificationMinute: Int = 0
 )
 
 // MARK: - List Mode

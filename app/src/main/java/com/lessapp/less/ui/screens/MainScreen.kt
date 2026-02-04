@@ -272,6 +272,8 @@ fun MainScreen(
                 onToggleContinuous = { viewModel.toggleContinuous() },
                 onToggleGestures = { viewModel.toggleGestures() },
                 onToggleDarkMode = { viewModel.toggleDarkMode() },
+                onToggleNotifications = { viewModel.toggleNotifications() },
+                onNotificationTimeChange = { hour, minute -> viewModel.setNotificationTime(hour, minute) },
                 onHelpClick = {
                     viewModel.setShowMenu(false)
                     viewModel.setShowHelp(true)

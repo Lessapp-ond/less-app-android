@@ -134,4 +134,10 @@ class L10n(val lang: Lang) {
         "This feature will be available in an upcoming update.",
         "Esta función estará disponible en una próxima actualización."
     )
+
+    // Notifications
+    val notifications get() = t("Rappel quotidien", "Daily reminder", "Recordatorio diario")
+    val notificationsOn get() = t("Activé", "On", "Activado")
+    val notificationsOff get() = t("Désactivé", "Off", "Desactivado")
+    val notificationTime get() = t("Heure", "Time", "Hora")
 }
