@@ -44,6 +44,7 @@ fun MainScreen(
     val showCardMenu by viewModel.showCardMenu.collectAsState()
     val showFeedback by viewModel.showFeedback.collectAsState()
     val showDonation by viewModel.showDonation.collectAsState()
+    val showSettings by viewModel.showSettings.collectAsState()
     val selectedCardId by viewModel.selectedCardId.collectAsState()
     val undoToast by viewModel.undoToast.collectAsState()
     val learnedCount by viewModel.learnedCount.collectAsState()
@@ -277,6 +278,27 @@ fun MainScreen(
                 l10n = l10n,
                 onModeChange = { viewModel.setListMode(it) },
                 onLangChange = { viewModel.setLang(it) },
+                onSettingsClick = {
+                    viewModel.setShowMenu(false)
+                    viewModel.setShowSettings(true)
+                },
+                onHelpClick = {
+                    viewModel.setShowMenu(false)
+                    viewModel.setShowHelp(true)
+                },
+                onClose = { viewModel.setShowMenu(false) }
+            )
+        }
+    }
+
+    // Settings Sheet
+    if (showSettings) {
+        ModalBottomSheet(
+            onDismissRequest = { viewModel.setShowSettings(false) }
+        ) {
+            SettingsSheet(
+                settings = settings,
+                l10n = l10n,
                 onToggleTextScale = { viewModel.toggleTextScale() },
                 onToggleFocus = { viewModel.toggleFocus() },
                 onToggleContinuous = { viewModel.toggleContinuous() },
@@ -284,11 +306,11 @@ fun MainScreen(
                 onToggleDarkMode = { viewModel.toggleDarkMode() },
                 onToggleNotifications = { viewModel.toggleNotifications() },
                 onNotificationTimeChange = { hour, minute -> viewModel.setNotificationTime(hour, minute) },
-                onHelpClick = {
-                    viewModel.setShowMenu(false)
-                    viewModel.setShowHelp(true)
+                onSupportClick = {
+                    viewModel.setShowSettings(false)
+                    viewModel.setShowDonation(true)
                 },
-                onClose = { viewModel.setShowMenu(false) }
+                onClose = { viewModel.setShowSettings(false) }
             )
         }
     }

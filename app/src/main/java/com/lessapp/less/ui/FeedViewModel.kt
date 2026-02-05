@@ -71,6 +71,9 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private val _showDonation = MutableStateFlow(false)
     val showDonation: StateFlow<Boolean> = _showDonation.asStateFlow()
 
+    private val _showSettings = MutableStateFlow(false)
+    val showSettings: StateFlow<Boolean> = _showSettings.asStateFlow()
+
     private val _selectedCardId = MutableStateFlow<String?>(null)
     val selectedCardId: StateFlow<String?> = _selectedCardId.asStateFlow()
 
@@ -616,6 +619,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     fun setShowCardMenu(show: Boolean) { _showCardMenu.value = show }
     fun setShowFeedback(show: Boolean) { _showFeedback.value = show }
     fun setShowDonation(show: Boolean) { _showDonation.value = show }
+    fun setShowSettings(show: Boolean) { _showSettings.value = show }
     fun dismissDailyCompletion() { _showDailyCompletion.value = false }
     fun setSelectedCardId(cardId: String?) { _selectedCardId.value = cardId }
     fun clearAdError() { _adError.value = null }

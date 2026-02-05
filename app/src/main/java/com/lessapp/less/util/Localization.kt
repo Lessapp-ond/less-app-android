@@ -141,4 +141,11 @@ class L10n(val lang: Lang) {
     val notificationsOn get() = t("Activé", "On", "Activado")
     val notificationsOff get() = t("Désactivé", "Off", "Desactivado")
     val notificationTime get() = t("Heure", "Time", "Hora")
+
+    // Settings Page
+    val settings get() = t("Réglages", "Settings", "Ajustes")
+    val appearance get() = t("Apparence", "Appearance", "Apariencia")
+    val support get() = t("Soutenir", "Support", "Apoyar")
+    val supportUs get() = t("Nous soutenir", "Support us", "Apóyanos")
+    val done get() = t("OK", "Done", "Listo")
 }

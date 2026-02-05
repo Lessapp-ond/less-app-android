@@ -13,26 +13,19 @@ import androidx.compose.ui.unit.sp
 import com.lessapp.less.data.model.*
 import com.lessapp.less.util.L10n
 
-// MARK: - Menu Sheet
+// MARK: - Menu Sheet (Simplified)
 @Composable
 fun MenuSheet(
     settings: UISettings,
     l10n: L10n,
     onModeChange: (ListMode) -> Unit,
     onLangChange: (Lang) -> Unit,
-    onToggleTextScale: () -> Unit,
-    onToggleFocus: () -> Unit,
-    onToggleContinuous: () -> Unit,
-    onToggleGestures: () -> Unit,
-    onToggleDarkMode: () -> Unit,
-    onToggleNotifications: () -> Unit,
-    onNotificationTimeChange: (Int, Int) -> Unit,
+    onSettingsClick: () -> Unit,
     onHelpClick: () -> Unit,
     onClose: () -> Unit
 ) {
     val currentMode = ListMode.fromValue(settings.listMode)
     val currentLang = Lang.fromCode(settings.lang)
-    val currentScale = TextScale.fromValue(settings.textScale)
 
     Column(
         modifier = Modifier
@@ -55,7 +48,6 @@ fun MenuSheet(
             ModeChip(l10n.feed, currentMode == ListMode.FEED) { onModeChange(ListMode.FEED) }
             ModeChip(l10n.daily, currentMode == ListMode.DAILY) { onModeChange(ListMode.DAILY) }
             ModeChip(l10n.learnedMode, currentMode == ListMode.LEARNED) { onModeChange(ListMode.LEARNED) }
-            ModeChip(l10n.unusefulMode, currentMode == ListMode.UNUSEFUL) { onModeChange(ListMode.UNUSEFUL) }
             ModeChip(l10n.review, currentMode == ListMode.REVIEW) { onModeChange(ListMode.REVIEW) }
             ModeChip("❤️", currentMode == ListMode.FAVORITES) { onModeChange(ListMode.FAVORITES) }
         }
@@ -80,6 +72,73 @@ fun MenuSheet(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Bottom row: Settings + Help
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            TextButton(onClick = onSettingsClick) {
+                Text(
+                    text = "⚙️ ${l10n.settings}",
+                    color = Color.Black.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            TextButton(onClick = onHelpClick) {
+                Text(
+                    text = "❓ ${l10n.help}",
+                    color = Color.Black.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Settings Sheet
+@Composable
+fun SettingsSheet(
+    settings: UISettings,
+    l10n: L10n,
+    onToggleTextScale: () -> Unit,
+    onToggleFocus: () -> Unit,
+    onToggleContinuous: () -> Unit,
+    onToggleGestures: () -> Unit,
+    onToggleDarkMode: () -> Unit,
+    onToggleNotifications: () -> Unit,
+    onNotificationTimeChange: (Int, Int) -> Unit,
+    onSupportClick: () -> Unit,
+    onClose: () -> Unit
+) {
+    val currentScale = TextScale.fromValue(settings.textScale)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 32.dp)
+    ) {
+        // Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = l10n.settings,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+            TextButton(onClick = onClose) {
+                Text(
+                    text = l10n.done,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
         // Reading settings
         Text(
             text = l10n.reading,
@@ -93,7 +152,7 @@ fun MenuSheet(
         ) {
             ModeChip(
                 if (currentScale == TextScale.NORMAL) "A" else "A+",
-                false
+                currentScale == TextScale.LARGE
             ) { onToggleTextScale() }
             ModeChip(l10n.focus, settings.focusMode) { onToggleFocus() }
             ModeChip(l10n.continuous, settings.continuousReading) { onToggleContinuous() }
@@ -102,9 +161,9 @@ fun MenuSheet(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Dark mode
+        // Appearance
         Text(
-            text = l10n.darkMode,
+            text = l10n.appearance,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color.Black.copy(alpha = 0.5f)
@@ -113,7 +172,7 @@ fun MenuSheet(
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            ModeChip("🌙", settings.darkMode) { onToggleDarkMode() }
+            ModeChip("🌙 ${l10n.darkMode}", settings.darkMode) { onToggleDarkMode() }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -146,11 +205,19 @@ fun MenuSheet(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Help
-        TextButton(onClick = onHelpClick) {
+        // Support
+        Text(
+            text = l10n.support,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Black.copy(alpha = 0.5f)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        TextButton(onClick = onSupportClick) {
             Text(
-                text = l10n.help,
-                color = Color.Black.copy(alpha = 0.6f)
+                text = "❤️ ${l10n.supportUs}",
+                color = Color.Red,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
