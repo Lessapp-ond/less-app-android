@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.lessapp.less.data.model.*
 import com.lessapp.less.data.repository.*
 import com.lessapp.less.service.AdMobService
+import com.lessapp.less.service.AnalyticsService
 import com.lessapp.less.service.NotificationService
 import com.lessapp.less.service.SupabaseService
 import com.lessapp.less.util.L10n
@@ -406,6 +407,11 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             val lang = Lang.fromCode(_settings.value.lang)
             val listMode = ListMode.fromValue(_settings.value.listMode)
 
+            // Track view analytics (anonymous)
+            if (cardId != OpeningCard.ID && cardId != "system_card") {
+                AnalyticsService.track(cardId, AnalyticsService.EventType.VIEW, lang)
+            }
+
             // Daily mode tracking
             if (listMode == ListMode.DAILY) {
                 if (cardId == OpeningCard.ID) {
@@ -465,6 +471,11 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val isNowLearned = learnedRepo.toggle(cardId)
 
+            // Track analytics
+            if (isNowLearned) {
+                AnalyticsService.track(cardId, AnalyticsService.EventType.LEARNED, Lang.fromCode(_settings.value.lang))
+            }
+
             // Haptic
             vibrate(if (isNowLearned) VibrationEffect.EFFECT_TICK else VibrationEffect.EFFECT_HEAVY_CLICK)
 
@@ -492,6 +503,11 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val isNowUnuseful = unusefulRepo.toggle(cardId)
 
+            // Track analytics
+            if (isNowUnuseful) {
+                AnalyticsService.track(cardId, AnalyticsService.EventType.UNUSEFUL, Lang.fromCode(_settings.value.lang))
+            }
+
             vibrate(VibrationEffect.EFFECT_TICK)
 
             if (isNowUnuseful) {
@@ -511,6 +527,11 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val isNowInReview = reviewRepo.toggle(cardId)
 
+            // Track analytics
+            if (isNowInReview) {
+                AnalyticsService.track(cardId, AnalyticsService.EventType.REVIEW, Lang.fromCode(_settings.value.lang))
+            }
+
             vibrate(VibrationEffect.EFFECT_TICK)
 
             if (isNowInReview) {
@@ -528,7 +549,13 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     fun toggleFavorite(cardId: String) {
         viewModelScope.launch {
-            favoritesRepo.toggle(cardId)
+            val isNowFavorite = favoritesRepo.toggle(cardId)
+
+            // Track analytics
+            if (isNowFavorite) {
+                AnalyticsService.track(cardId, AnalyticsService.EventType.FAVORITE, Lang.fromCode(_settings.value.lang))
+            }
+
             vibrate(VibrationEffect.EFFECT_TICK)
 
             // Rebuild if in favorites mode to update the list
