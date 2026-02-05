@@ -6,14 +6,13 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.lessapp.less.data.model.Lang
 import com.lessapp.less.data.repository.dataStore
-import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.postgrest.rpc
-import io.github.jan.supabase.serializer.KotlinXSerializer
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.Serializable
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.net.HttpURLConnection
+import java.net.URL
 
 /**
  * Anonymous analytics service - no user tracking.
@@ -29,14 +28,6 @@ object AnalyticsService {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    private val client = createSupabaseClient(
-        supabaseUrl = SUPABASE_URL,
-        supabaseKey = SUPABASE_KEY
-    ) {
-        defaultSerializer = KotlinXSerializer(json)
-        install(Postgrest)
-    }
-
     // In-memory cache of pending events
     private val pendingEvents = mutableMapOf<String, Int>()
 
@@ -47,14 +38,6 @@ object AnalyticsService {
         FAVORITE("favorite"),
         REVIEW("review")
     }
-
-    @Serializable
-    private data class AnalyticsParams(
-        val p_card_id: String,
-        val p_event_type: String,
-        val p_lang: String,
-        val p_count: Int
-    )
 
     /**
      * Track an event locally (will be sent on flush)
@@ -104,7 +87,6 @@ object AnalyticsService {
      * Flush all pending events to Supabase
      */
     suspend fun flush(context: Context) {
-        // Get and clear pending events
         val eventsToSend: Map<String, Int>
         synchronized(pendingEvents) {
             eventsToSend = pendingEvents.toMap()
@@ -129,24 +111,14 @@ object AnalyticsService {
             val lang = parts[2]
 
             try {
-                client.postgrest.rpc(
-                    function = "upsert_analytics",
-                    parameters = AnalyticsParams(
-                        p_card_id = cardId,
-                        p_event_type = eventType,
-                        p_lang = lang,
-                        p_count = count
-                    )
-                )
+                sendToSupabase(cardId, eventType, lang, count)
                 Log.d(TAG, "Sent: $key x $count")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to send $key: ${e.message}")
-                // Re-queue failed events
                 failedEvents[key] = count
             }
         }
 
-        // Re-add failed events
         if (failedEvents.isNotEmpty()) {
             synchronized(pendingEvents) {
                 failedEvents.forEach { (key, count) ->
@@ -155,7 +127,36 @@ object AnalyticsService {
             }
         }
 
-        // Save remaining pending events
         savePending(context)
+    }
+
+    /**
+     * Send to Supabase RPC via HTTP
+     */
+    private suspend fun sendToSupabase(cardId: String, eventType: String, lang: String, count: Int) {
+        withContext(Dispatchers.IO) {
+            val url = URL("$SUPABASE_URL/rest/v1/rpc/upsert_analytics")
+            val connection = url.openConnection() as HttpURLConnection
+
+            try {
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.setRequestProperty("apikey", SUPABASE_KEY)
+                connection.setRequestProperty("Authorization", "Bearer $SUPABASE_KEY")
+                connection.doOutput = true
+
+                val body = """{"p_card_id":"$cardId","p_event_type":"$eventType","p_lang":"$lang","p_count":$count}"""
+                connection.outputStream.use { os ->
+                    os.write(body.toByteArray())
+                }
+
+                val responseCode = connection.responseCode
+                if (responseCode !in 200..299) {
+                    throw Exception("HTTP $responseCode")
+                }
+            } finally {
+                connection.disconnect()
+            }
+        }
     }
 }
