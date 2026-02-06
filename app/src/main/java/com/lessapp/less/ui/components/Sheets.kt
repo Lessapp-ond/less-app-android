@@ -2,6 +2,10 @@ package com.lessapp.less.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -49,7 +53,7 @@ fun MenuSheet(
             ModeChip(l10n.daily, currentMode == ListMode.DAILY) { onModeChange(ListMode.DAILY) }
             ModeChip(l10n.learnedMode, currentMode == ListMode.LEARNED) { onModeChange(ListMode.LEARNED) }
             ModeChip(l10n.review, currentMode == ListMode.REVIEW) { onModeChange(ListMode.REVIEW) }
-            ModeChip("❤️", currentMode == ListMode.FAVORITES) { onModeChange(ListMode.FAVORITES) }
+            HeartChip(currentMode == ListMode.FAVORITES) { onModeChange(ListMode.FAVORITES) }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -74,23 +78,68 @@ fun MenuSheet(
 
         // Bottom row: Settings + Help
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             TextButton(onClick = onSettingsClick) {
-                Text(
-                    text = "⚙️ ${l10n.settings}",
-                    color = Color.Black.copy(alpha = 0.7f),
-                    fontWeight = FontWeight.SemiBold
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Black
+                    )
+                    Text(
+                        text = l10n.settings,
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
             TextButton(onClick = onHelpClick) {
-                Text(
-                    text = "❓ ${l10n.help}",
-                    color = Color.Black.copy(alpha = 0.7f),
-                    fontWeight = FontWeight.SemiBold
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.HelpOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Black
+                    )
+                    Text(
+                        text = l10n.help,
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
+    }
+}
+
+// Heart chip with better visibility
+@Composable
+fun HeartChip(
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = if (selected) Color.Red else Color.White,
+        border = if (!selected) ButtonDefaults.outlinedButtonBorder else null
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Favorite,
+            contentDescription = "Favorites",
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).size(18.dp),
+            tint = if (selected) Color.White else Color.Red
+        )
     }
 }
 
