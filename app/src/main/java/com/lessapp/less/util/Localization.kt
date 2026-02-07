@@ -148,4 +148,28 @@ class L10n(val lang: Lang) {
     val support get() = t("Soutenir", "Support", "Apoyar")
     val supportUs get() = t("Nous soutenir", "Support us", "Apóyanos")
     val done get() = t("OK", "Done", "Listo")
+
+    // Onboarding
+    val onboardingNext get() = t("Suivant", "Next", "Siguiente")
+    val onboardingSkip get() = t("Passer", "Skip", "Saltar")
+    val onboardingStart get() = t("C'est parti !", "Let's go!", "¡Vamos!")
+    val onboardingWelcome get() = t(
+        "Apprends quelque chose de nouveau chaque jour",
+        "Learn something new every day",
+        "Aprende algo nuevo cada día"
+    )
+    val onboardingHowTitle get() = t("Comment ça marche", "How it works", "Cómo funciona")
+    val onboardingHow1 get() = t("1 carte = 20-30 secondes", "1 card = 20-30 seconds", "1 tarjeta = 20-30 segundos")
+    val onboardingHow2 get() = t("Scroll pour passer à la suivante", "Scroll to continue", "Desliza para continuar")
+    val onboardingHow3 get() = t("Le feed s'adapte à toi", "The feed adapts to you", "El feed se adapta a ti")
+    val onboardingActionsTitle get() = t("Tes actions", "Your actions", "Tus acciones")
+    val onboardingAction1 get() = t("J'ai appris → archive la carte", "Learned → archives the card", "Aprendido → archiva la tarjeta")
+    val onboardingAction2 get() = t("Pas utile → masque la carte", "Not useful → hides the card", "No útil → oculta la tarjeta")
+    val onboardingAction3 get() = t("À revoir → revient plus tard", "Review → comes back later", "Repasar → vuelve más tarde")
+    val onboardingLangTitle get() = t("Ta langue", "Your language", "Tu idioma")
+    val onboardingLangSubtitle get() = t(
+        "Tu pourras la changer dans les réglages",
+        "You can change it later in settings",
+        "Puedes cambiarlo en ajustes"
+    )
 }

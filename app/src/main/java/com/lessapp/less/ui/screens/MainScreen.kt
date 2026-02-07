@@ -64,9 +64,17 @@ fun MainScreen(
     // Load cards on first launch
     LaunchedEffect(Unit) {
         viewModel.loadCards()
-        if (!settings.helpSeen) {
-            viewModel.setShowHelp(true)
-        }
+    }
+
+    // Show onboarding if not seen
+    if (!settings.helpSeen) {
+        OnboardingScreen(
+            l10n = l10n,
+            currentLang = Lang.fromCode(settings.lang),
+            onSelectLang = { viewModel.setLang(it) },
+            onComplete = { viewModel.markHelpSeen() }
+        )
+        return
     }
 
     // Keep pager in bounds when feedItems changes
