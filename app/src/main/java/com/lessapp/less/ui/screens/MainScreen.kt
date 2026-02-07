@@ -56,6 +56,7 @@ fun MainScreen(
     val showDailyCompletion by viewModel.showDailyCompletion.collectAsState()
     val pagerKey by viewModel.pagerKey.collectAsState()
     val currentStreak by viewModel.currentStreak.collectAsState()
+    val maxStreak by viewModel.maxStreak.collectAsState()
 
     val l10n = viewModel.l10n
     val pagerState = rememberPagerState(pageCount = { maxOf(1, feedItems.size) })
@@ -330,6 +331,9 @@ fun MainScreen(
             SettingsSheet(
                 settings = settings,
                 l10n = l10n,
+                learnedCount = learnedCount,
+                maxStreak = maxStreak,
+                topTopic = viewModel.topTopic,
                 onToggleTextScale = { viewModel.toggleTextScale() },
                 onToggleFocus = { viewModel.toggleFocus() },
                 onToggleContinuous = { viewModel.toggleContinuous() },

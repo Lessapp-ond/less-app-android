@@ -119,6 +119,9 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private val _currentStreak = MutableStateFlow(0)
     val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
 
+    private val _maxStreak = MutableStateFlow(0)
+    val maxStreak: StateFlow<Int> = _maxStreak.asStateFlow()
+
     // Scoring Constants
     private val reviewPinnedBoost = 40.0
     private val reviewDueBoost = 260.0
@@ -129,6 +132,25 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     // Available topics from all cards
     val availableTopics: List<String>
         get() = allCards.map { it.topic }.distinct().sorted()
+
+    // Top topic from learned cards
+    private val _learnedIds = MutableStateFlow<Set<String>>(emptySet())
+
+    val topTopic: String?
+        get() {
+            val ids = _learnedIds.value
+            if (ids.isEmpty()) return null
+
+            // Count topics from learned cards
+            val topicCounts = mutableMapOf<String, Int>()
+            for (card in allCards) {
+                if (ids.contains(card.id)) {
+                    topicCounts[card.topic] = (topicCounts[card.topic] ?: 0) + 1
+                }
+            }
+
+            return topicCounts.maxByOrNull { it.value }?.key
+        }
 
     fun toggleTopic(topic: String) {
         viewModelScope.launch {
@@ -165,7 +187,9 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _settings.value = settingsRepo.getSettings()
             _learnedCount.value = learnedRepo.count()
+            _learnedIds.value = learnedRepo.learnedIds.first()
             _currentStreak.value = streakRepo.checkStreakValidity()
+            _maxStreak.value = streakRepo.getMaxStreak()
 
             // Load cards on startup
             loadCards()
@@ -480,6 +504,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                     dailyRepo.markDailyCompleted()
                     streakRepo.recordCompletion()
                     _currentStreak.value = streakRepo.getCurrentStreak()
+                    _maxStreak.value = streakRepo.getMaxStreak()
                     _isDailyComplete.value = true
                     _showDailyCompletion.value = true // Trigger celebration animation
                 }
@@ -515,6 +540,10 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val isNowLearned = learnedRepo.toggle(cardId)
 
+            // Update stats
+            _learnedCount.value = learnedRepo.count()
+            _learnedIds.value = learnedRepo.learnedIds.first()
+
             // Track analytics
             if (isNowLearned) {
                 AnalyticsService.track(cardId, AnalyticsService.EventType.LEARNED, Lang.fromCode(_settings.value.lang))
@@ -528,6 +557,8 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                 showUndoToast(l10n.undoLearned) {
                     viewModelScope.launch {
                         learnedRepo.toggle(cardId)
+                        _learnedCount.value = learnedRepo.count()
+                        _learnedIds.value = learnedRepo.learnedIds.first()
                         rebuildFeed()
                     }
                 }

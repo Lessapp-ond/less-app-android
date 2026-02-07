@@ -222,6 +222,9 @@ fun TopicChip(
 fun SettingsSheet(
     settings: UISettings,
     l10n: L10n,
+    learnedCount: Int,
+    maxStreak: Int,
+    topTopic: String?,
     onToggleTextScale: () -> Unit,
     onToggleFocus: () -> Unit,
     onToggleContinuous: () -> Unit,
@@ -258,6 +261,67 @@ fun SettingsSheet(
                     color = Color.Black
                 )
             }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Statistics
+        Text(
+            text = l10n.statistics,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Black.copy(alpha = 0.5f)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "✓ ${l10n.cardsLearned}",
+                fontSize = 14.sp,
+                color = Color.Black.copy(alpha = 0.7f)
+            )
+            Text(
+                text = "$learnedCount",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "🔥 ${l10n.maxStreak}",
+                fontSize = 14.sp,
+                color = Color.Black.copy(alpha = 0.7f)
+            )
+            Text(
+                text = "$maxStreak ${l10n.days}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "⭐ ${l10n.topTopic}",
+                fontSize = 14.sp,
+                color = Color.Black.copy(alpha = 0.7f)
+            )
+            Text(
+                text = topTopic?.replaceFirstChar { it.uppercase() } ?: l10n.noTopicYet,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black
+            )
         }
 
         Spacer(modifier = Modifier.height(20.dp))

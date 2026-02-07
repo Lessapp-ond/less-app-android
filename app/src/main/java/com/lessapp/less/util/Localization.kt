@@ -151,6 +151,14 @@ class L10n(val lang: Lang) {
     val supportUs get() = t("Nous soutenir", "Support us", "Apóyanos")
     val done get() = t("OK", "Done", "Listo")
 
+    // Statistics
+    val statistics get() = t("Statistiques", "Statistics", "Estadísticas")
+    val cardsLearned get() = t("Cartes apprises", "Cards learned", "Tarjetas aprendidas")
+    val maxStreak get() = t("Streak max", "Max streak", "Racha máxima")
+    val topTopic get() = t("Sujet préféré", "Top topic", "Tema favorito")
+    val days get() = t("jours", "days", "días")
+    val noTopicYet get() = t("Aucun pour l'instant", "None yet", "Ninguno aún")
+
     // Onboarding
     val onboardingNext get() = t("Suivant", "Next", "Siguiente")
     val onboardingSkip get() = t("Passer", "Skip", "Saltar")

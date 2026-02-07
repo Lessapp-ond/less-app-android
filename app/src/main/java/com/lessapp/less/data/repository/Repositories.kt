@@ -440,6 +440,7 @@ class DailyRepository(private val context: Context) {
 class StreakRepository(private val context: Context) {
 
     private val streakKey = intPreferencesKey("streak_count_v1")
+    private val maxStreakKey = intPreferencesKey("streak_max_v1")
     private val lastCompletionKey = stringPreferencesKey("streak_last_completion_v1")
 
     private val todayStringUtc: String
@@ -450,6 +451,10 @@ class StreakRepository(private val context: Context) {
 
     suspend fun getCurrentStreak(): Int {
         return context.dataStore.data.first()[streakKey] ?: 0
+    }
+
+    suspend fun getMaxStreak(): Int {
+        return context.dataStore.data.first()[maxStreakKey] ?: 0
     }
 
     private suspend fun getLastCompletionDate(): String? {
@@ -476,8 +481,12 @@ class StreakRepository(private val context: Context) {
             }
         }
 
+        val currentMax = getMaxStreak()
+        val newMax = maxOf(newStreak, currentMax)
+
         context.dataStore.edit {
             it[streakKey] = newStreak
+            it[maxStreakKey] = newMax
             it[lastCompletionKey] = today
         }
     }
