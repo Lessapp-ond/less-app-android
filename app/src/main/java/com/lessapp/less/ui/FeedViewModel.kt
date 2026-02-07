@@ -140,7 +140,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             }
             val newSettings = _settings.value.copy(selectedTopics = current)
             _settings.value = newSettings
-            settingsRepo.saveSettings(newSettings)
+            settingsRepo.save(newSettings)
             sessionOrderCache = emptyList() // Reset order when filter changes
             rebuildFeed()
         }
@@ -155,7 +155,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val newSettings = _settings.value.copy(selectedTopics = emptyList())
             _settings.value = newSettings
-            settingsRepo.saveSettings(newSettings)
+            settingsRepo.save(newSettings)
             sessionOrderCache = emptyList()
             rebuildFeed()
         }
