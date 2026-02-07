@@ -42,6 +42,8 @@ class L10n(val lang: Lang) {
     val gestures get() = t("Gestes", "Gestures", "Gestos")
     val darkMode get() = t("Mode sombre", "Dark mode", "Modo oscuro")
     val help get() = t("Aide", "Help", "Ayuda")
+    val topics get() = t("Catégories", "Topics", "Categorías")
+    val clearFilter get() = t("Effacer", "Clear", "Borrar")
 
     // Help
     val helpReadTitle get() = t("Lire", "Read", "Leer")

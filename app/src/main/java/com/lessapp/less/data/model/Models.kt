@@ -256,7 +256,9 @@ data class UISettings(
     // Notifications
     val notificationsEnabled: Boolean = false,
     val notificationHour: Int = 9,
-    val notificationMinute: Int = 0
+    val notificationMinute: Int = 0,
+    // Topic filter (empty = all topics)
+    val selectedTopics: List<String> = emptyList()
 )
 
 // MARK: - List Mode

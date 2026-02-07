@@ -304,8 +304,11 @@ fun MainScreen(
             MenuSheet(
                 settings = settings,
                 l10n = l10n,
+                availableTopics = viewModel.availableTopics,
                 onModeChange = { viewModel.setListMode(it) },
                 onLangChange = { viewModel.setLang(it) },
+                onTopicToggle = { viewModel.toggleTopic(it) },
+                onClearTopics = { viewModel.clearTopicFilter() },
                 onSettingsClick = {
                     viewModel.setShowMenu(false)
                     viewModel.setShowSettings(true)

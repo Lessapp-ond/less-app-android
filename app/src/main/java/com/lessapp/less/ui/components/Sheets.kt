@@ -1,6 +1,8 @@
 package com.lessapp.less.ui.components
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
@@ -22,14 +24,18 @@ import com.lessapp.less.util.L10n
 fun MenuSheet(
     settings: UISettings,
     l10n: L10n,
+    availableTopics: List<String>,
     onModeChange: (ListMode) -> Unit,
     onLangChange: (Lang) -> Unit,
+    onTopicToggle: (String) -> Unit,
+    onClearTopics: () -> Unit,
     onSettingsClick: () -> Unit,
     onHelpClick: () -> Unit,
     onClose: () -> Unit
 ) {
     val currentMode = ListMode.fromValue(settings.listMode)
     val currentLang = Lang.fromCode(settings.lang)
+    val selectedTopics = settings.selectedTopics
 
     Column(
         modifier = Modifier
@@ -72,6 +78,52 @@ fun MenuSheet(
             ModeChip("FR", currentLang == Lang.FR) { onLangChange(Lang.FR) }
             ModeChip("EN", currentLang == Lang.EN) { onLangChange(Lang.EN) }
             ModeChip("ES", currentLang == Lang.ES) { onLangChange(Lang.ES) }
+        }
+
+        // Topics filter
+        if (availableTopics.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = l10n.topics,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black.copy(alpha = 0.5f)
+                )
+                if (selectedTopics.isNotEmpty()) {
+                    TextButton(
+                        onClick = onClearTopics,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                    ) {
+                        Text(
+                            text = l10n.clearFilter,
+                            fontSize = 12.sp,
+                            color = Color.Blue
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                availableTopics.forEach { topic ->
+                    val isSelected = selectedTopics.isEmpty() || selectedTopics.contains(topic)
+                    TopicChip(
+                        label = topic.replaceFirstChar { it.uppercase() },
+                        isSelected = isSelected && selectedTopics.isNotEmpty(),
+                        onClick = { onTopicToggle(topic) }
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -139,6 +191,28 @@ fun HeartChip(
             contentDescription = "Favorites",
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp).size(18.dp),
             tint = if (selected) Color.White else Color.Red
+        )
+    }
+}
+
+// Topic chip for filtering
+@Composable
+fun TopicChip(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(999.dp),
+        color = if (isSelected) Color.Blue else Color.Gray.copy(alpha = 0.1f)
+    ) {
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = if (isSelected) Color.White else Color.Black.copy(alpha = 0.7f),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
         )
     }
 }

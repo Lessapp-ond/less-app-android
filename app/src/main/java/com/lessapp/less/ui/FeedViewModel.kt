@@ -126,6 +126,41 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     val l10n: L10n
         get() = L10n(Lang.fromCode(_settings.value.lang))
 
+    // Available topics from all cards
+    val availableTopics: List<String>
+        get() = allCards.map { it.topic }.distinct().sorted()
+
+    fun toggleTopic(topic: String) {
+        viewModelScope.launch {
+            val current = _settings.value.selectedTopics.toMutableList()
+            if (current.contains(topic)) {
+                current.remove(topic)
+            } else {
+                current.add(topic)
+            }
+            val newSettings = _settings.value.copy(selectedTopics = current)
+            _settings.value = newSettings
+            settingsRepo.saveSettings(newSettings)
+            sessionOrderCache = emptyList() // Reset order when filter changes
+            rebuildFeed()
+        }
+    }
+
+    fun isTopicSelected(topic: String): Boolean {
+        val selected = _settings.value.selectedTopics
+        return selected.isEmpty() || selected.contains(topic)
+    }
+
+    fun clearTopicFilter() {
+        viewModelScope.launch {
+            val newSettings = _settings.value.copy(selectedTopics = emptyList())
+            _settings.value = newSettings
+            settingsRepo.saveSettings(newSettings)
+            sessionOrderCache = emptyList()
+            rebuildFeed()
+        }
+    }
+
     init {
         viewModelScope.launch {
             _settings.value = settingsRepo.getSettings()
@@ -241,7 +276,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         // Filter based on list mode
-        val filtered = when (listMode) {
+        var filtered = when (listMode) {
             ListMode.FEED -> allCards.filter { card ->
                 !learnedRepo.isLearned(card.id) && !unusefulRepo.isUnuseful(card.id)
             }
@@ -250,6 +285,12 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             ListMode.UNUSEFUL -> allCards.filter { unusefulRepo.isUnuseful(it.id) }
             ListMode.REVIEW -> allCards.filter { reviewRepo.isInReview(it.id) }
             ListMode.FAVORITES -> allCards.filter { favoritesRepo.isFavorite(it.id) }
+        }
+
+        // Apply topic filter (if any topics selected)
+        val selectedTopics = _settings.value.selectedTopics
+        if (selectedTopics.isNotEmpty()) {
+            filtered = filtered.filter { selectedTopics.contains(it.topic) }
         }
 
         // Score and sort
