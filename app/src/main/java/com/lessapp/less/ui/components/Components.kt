@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,6 +42,7 @@ fun CardView(
     l10n: L10n,
     onLearnedClick: () -> Unit,
     onMenuClick: () -> Unit,
+    onShareClick: () -> Unit,
     onFavoriteClick: () -> Unit,
     onSwipeRight: () -> Unit,
     onSwipeLeft: () -> Unit
@@ -181,6 +184,23 @@ fun CardView(
                                 text = l10n.learned,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        // Share button
+                        Surface(
+                            onClick = onShareClick,
+                            shape = RoundedCornerShape(22.dp),
+                            color = colors.buttonBackground,
+                            border = ButtonDefaults.outlinedButtonBorder
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Share,
+                                contentDescription = "Share",
+                                tint = colors.buttonText,
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .size(24.dp)
                             )
                         }
 

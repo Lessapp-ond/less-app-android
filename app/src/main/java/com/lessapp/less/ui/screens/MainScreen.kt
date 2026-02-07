@@ -1,6 +1,7 @@
 package com.lessapp.less.ui.screens
 
 import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -203,6 +204,25 @@ fun MainScreen(
                                     onMenuClick = {
                                         viewModel.setSelectedCardId(item.card.id)
                                         viewModel.setShowCardMenu(true)
+                                    },
+                                    onShareClick = {
+                                        val card = item.card
+                                        val shareText = buildString {
+                                            append("${card.title}\n\n")
+                                            append("${card.hook}\n\n")
+                                            card.bullets.forEach { bullet ->
+                                                append("• $bullet\n")
+                                            }
+                                            append("\n💡 ${card.why}\n\n")
+                                            append("— LESS")
+                                        }
+                                        val sendIntent = Intent().apply {
+                                            action = Intent.ACTION_SEND
+                                            putExtra(Intent.EXTRA_TEXT, shareText)
+                                            type = "text/plain"
+                                        }
+                                        val shareIntent = Intent.createChooser(sendIntent, null)
+                                        activity.startActivity(shareIntent)
                                     },
                                     onFavoriteClick = {
                                         viewModel.toggleFavorite(item.card.id)
