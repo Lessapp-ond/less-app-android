@@ -9,6 +9,7 @@ import android.widget.RemoteViews
 import com.lessapp.less.MainActivity
 import com.lessapp.less.R
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -119,7 +120,7 @@ class LessWidgetProvider : AppWidgetProvider() {
         fun saveCardsForWidget(context: Context, cards: List<WidgetCard>, lang: String) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit().apply {
-                putString(KEY_CARDS, Json.encodeToString(cards))
+                putString(KEY_CARDS, Json.encodeToString(ListSerializer(WidgetCard.serializer()), cards))
                 putString(KEY_LANG, lang)
                 apply()
             }
