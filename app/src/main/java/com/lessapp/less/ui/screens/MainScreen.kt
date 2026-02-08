@@ -29,6 +29,7 @@ import com.lessapp.less.service.SupabaseService
 import com.lessapp.less.ui.FeedViewModel
 import com.lessapp.less.ui.components.*
 import com.lessapp.less.ui.theme.AppColors
+import com.lessapp.less.util.CardShareHelper
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -212,23 +213,7 @@ fun MainScreen(
                                         viewModel.setShowCardMenu(true)
                                     },
                                     onShareClick = {
-                                        val card = item.card
-                                        val shareText = buildString {
-                                            append("${card.title}\n\n")
-                                            append("${card.hook}\n\n")
-                                            card.bullets.forEach { bullet ->
-                                                append("• $bullet\n")
-                                            }
-                                            append("\n💡 ${card.why}\n\n")
-                                            append("— LESS")
-                                        }
-                                        val sendIntent = Intent().apply {
-                                            action = Intent.ACTION_SEND
-                                            putExtra(Intent.EXTRA_TEXT, shareText)
-                                            type = "text/plain"
-                                        }
-                                        val shareIntent = Intent.createChooser(sendIntent, null)
-                                        activity.startActivity(shareIntent)
+                                        CardShareHelper.shareCard(activity, item.card, l10n)
                                     },
                                     onFavoriteClick = {
                                         viewModel.toggleFavorite(item.card.id)
