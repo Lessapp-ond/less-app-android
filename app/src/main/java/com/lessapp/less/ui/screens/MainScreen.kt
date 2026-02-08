@@ -207,7 +207,10 @@ fun MainScreen(
                                     gesturesEnabled = settings.gesturesEnabled,
                                     isDark = settings.darkMode,
                                     l10n = l10n,
-                                    onLearnedClick = { viewModel.toggleLearned(item.card.id) },
+                                    onLearnedClick = {
+                                        viewModel.toggleLearned(item.card.id)
+                                        isLearned = !isLearned
+                                    },
                                     onMenuClick = {
                                         viewModel.setSelectedCardId(item.card.id)
                                         viewModel.setShowCardMenu(true)
@@ -219,7 +222,10 @@ fun MainScreen(
                                         viewModel.toggleFavorite(item.card.id)
                                         isFavorite = !isFavorite
                                     },
-                                    onSwipeRight = { viewModel.toggleLearned(item.card.id) },
+                                    onSwipeRight = {
+                                        viewModel.toggleLearned(item.card.id)
+                                        isLearned = !isLearned
+                                    },
                                     onSwipeLeft = { viewModel.toggleUnuseful(item.card.id) }
                                 )
                             }
