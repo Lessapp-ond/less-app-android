@@ -609,8 +609,8 @@ fun DailyProgressView(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 5 dots: 1 opening + 4 content cards
-        repeat(5) { index ->
+        // 6 dots: 1 opening + 5 content cards
+        repeat(6) { index ->
             val filled = if (index == 0) progress >= 0 else progress >= index
             Box(
                 modifier = Modifier

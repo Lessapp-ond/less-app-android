@@ -387,8 +387,8 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         val opening = OpeningCard.forLang(lang)
         items.add(FeedItem.Opening(opening))
 
-        // 2. Select 4 deterministic content cards (different from feed order)
-        val dailyCards = selectDailyCards(allCards, 4, lang)
+        // 2. Select 5 deterministic content cards (different from feed order)
+        val dailyCards = selectDailyCards(allCards, 5, lang)
         for (card in dailyCards) {
             items.add(FeedItem.Content(card))
         }
@@ -499,8 +499,8 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                 val sessionContentViews = dailySessionViewedIds.size
                 _dailyProgress.value = sessionContentViews
 
-                // Check if daily is complete (all 4 content cards viewed in THIS session)
-                if (sessionContentViews >= 4 && !_isDailyComplete.value) {
+                // Check if daily is complete (all 5 content cards viewed in THIS session)
+                if (sessionContentViews >= 5 && !_isDailyComplete.value) {
                     dailyRepo.markDailyCompleted()
                     streakRepo.recordCompletion()
                     _currentStreak.value = streakRepo.getCurrentStreak()
@@ -535,8 +535,39 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // MARK: - Daily Action Tracking
+    /** Call when a card action is taken (learned, review, etc.) to count as "viewed" in daily mode */
+    private fun trackDailyAction(cardId: String) {
+        val listMode = ListMode.fromValue(_settings.value.listMode)
+        if (listMode != ListMode.DAILY) return
+        if (cardId == OpeningCard.ID || cardId == "system_card") return
+
+        viewModelScope.launch {
+            // Track in session AND persist if not already tracked
+            if (!dailySessionViewedIds.contains(cardId)) {
+                dailySessionViewedIds.add(cardId)
+                dailyRepo.markCardViewed(cardId)
+            }
+
+            // Update progress
+            val sessionContentViews = dailySessionViewedIds.size
+            _dailyProgress.value = sessionContentViews
+
+            // Check completion
+            if (sessionContentViews >= 5 && !_isDailyComplete.value) {
+                dailyRepo.markDailyCompleted()
+                streakRepo.recordCompletion()
+                _currentStreak.value = streakRepo.getCurrentStreak()
+                _maxStreak.value = streakRepo.getMaxStreak()
+                _isDailyComplete.value = true
+                _showDailyCompletion.value = true
+            }
+        }
+    }
+
     // MARK: - Actions
     fun toggleLearned(cardId: String) {
+        trackDailyAction(cardId)
         viewModelScope.launch {
             val isNowLearned = learnedRepo.toggle(cardId)
 
@@ -575,6 +606,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleUnuseful(cardId: String) {
+        trackDailyAction(cardId)
         viewModelScope.launch {
             val isNowUnuseful = unusefulRepo.toggle(cardId)
 
@@ -599,6 +631,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleReview(cardId: String) {
+        trackDailyAction(cardId)
         viewModelScope.launch {
             val isNowInReview = reviewRepo.toggle(cardId)
 
@@ -623,6 +656,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleFavorite(cardId: String) {
+        trackDailyAction(cardId)
         viewModelScope.launch {
             val isNowFavorite = favoritesRepo.toggle(cardId)
 

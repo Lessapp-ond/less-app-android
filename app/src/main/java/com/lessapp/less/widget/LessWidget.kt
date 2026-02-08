@@ -125,11 +125,16 @@ class LessWidgetProvider : AppWidgetProvider() {
                 apply()
             }
 
-            // Trigger widget update
-            val intent = Intent(context, LessWidgetProvider::class.java).apply {
-                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            // Trigger widget update for all widget instances
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val componentName = android.content.ComponentName(context, LessWidgetProvider::class.java)
+            val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
+
+            if (appWidgetIds.isNotEmpty()) {
+                for (appWidgetId in appWidgetIds) {
+                    updateAppWidget(context, appWidgetManager, appWidgetId)
+                }
             }
-            context.sendBroadcast(intent)
         }
     }
 }
