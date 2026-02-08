@@ -517,7 +517,9 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                     _currentStreak.value = streakRepo.getCurrentStreak()
                     _maxStreak.value = streakRepo.getMaxStreak()
                     _isDailyComplete.value = true
-                    _showDailyCompletion.value = true // Trigger celebration animation
+                    // Delay animation so user can see the last card first
+                    delay(1500)
+                    _showDailyCompletion.value = true
                 }
 
                 return@launch
@@ -571,6 +573,8 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                 _currentStreak.value = streakRepo.getCurrentStreak()
                 _maxStreak.value = streakRepo.getMaxStreak()
                 _isDailyComplete.value = true
+                // Delay animation so user can see the result of their action
+                delay(1500)
                 _showDailyCompletion.value = true
             }
         }
