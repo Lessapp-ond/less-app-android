@@ -99,6 +99,8 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private var uniqueViewedCount = 0
     private var sessionInjected = false
     private var viewedDurations: MutableMap<String, Int> = mutableMapOf()
+    private var dailyCardsCache: List<Card> = emptyList() // Cache daily cards for the session
+    private var dailyCacheDate: String = "" // Track which day the cache is for
 
     // Daily State
     private val _dailyProgress = MutableStateFlow(0)
@@ -400,18 +402,19 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         return items
     }
 
-    private suspend fun selectDailyCards(cards: List<Card>, count: Int, lang: Lang): List<Card> {
+    private fun selectDailyCards(cards: List<Card>, count: Int, lang: Lang): List<Card> {
         if (cards.isEmpty()) return emptyList()
 
-        // Filter out learned/unuseful cards
-        val available = cards.filter { card ->
-            !learnedRepo.isLearned(card.id) && !unusefulRepo.isUnuseful(card.id)
+        // Check if we have a valid cache for today
+        val todayString = dailyDateString()
+        if (dailyCardsCache.isNotEmpty() && dailyCacheDate == todayString) {
+            return dailyCardsCache
         }
 
-        if (available.isEmpty()) return emptyList()
-
+        // For daily mode, DON'T filter out learned/unuseful cards
+        // The same 5 cards should appear regardless of their status
         // Sort by ID for consistent base order
-        val sorted = available.sortedBy { it.id }
+        val sorted = cards.sortedBy { it.id }
 
         // Use daily-specific seed (different from feed which doesn't use seeded random)
         val seed = dailySeed(lang)
@@ -426,14 +429,22 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         // Reverse to make it even more different from any natural order
         shuffled.reverse()
 
-        // Take first N cards
-        return shuffled.take(count)
+        // Take first N cards and cache them
+        val selected = shuffled.take(count)
+        dailyCardsCache = selected
+        dailyCacheDate = todayString
+
+        return selected
+    }
+
+    private fun dailyDateString(): String {
+        return java.time.LocalDate.now(java.time.ZoneOffset.UTC)
+            .format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
     }
 
     private fun dailySeed(lang: Lang): Long {
         // Create deterministic seed from today's date (UTC) + language
-        val dateString = java.time.LocalDate.now(java.time.ZoneOffset.UTC)
-            .format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE) + "_daily_" + lang.code
+        val dateString = dailyDateString() + "_daily_" + lang.code
 
         // FNV-1a hash for better distribution
         var hash: Long = -3750763034362895579L // 14695981039346656037 as signed
