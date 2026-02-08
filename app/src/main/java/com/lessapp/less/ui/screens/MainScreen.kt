@@ -92,9 +92,10 @@ fun MainScreen(
         }
     }
 
-    // Track visible cards
-    LaunchedEffect(pagerState.currentPage) {
-        if (feedItems.isNotEmpty() && pagerState.currentPage < feedItems.size) {
+    // Track visible cards - only when pager has settled
+    LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
+        // Wait for pager to finish scrolling before tracking
+        if (!pagerState.isScrollInProgress && feedItems.isNotEmpty() && pagerState.currentPage < feedItems.size) {
             viewModel.cardBecameVisible(feedItems[pagerState.currentPage].id)
         }
     }
