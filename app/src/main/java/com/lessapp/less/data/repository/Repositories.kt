@@ -275,6 +275,21 @@ class CardsCacheRepository(private val context: Context) {
         context.dataStore.edit {
             it[PreferenceKeys.cardsCacheKey(lang)] = json.encodeToString(cache)
         }
+
+        // Save for widget (top 20 cards)
+        saveForWidget(lang, cards)
+    }
+
+    private fun saveForWidget(lang: Lang, cards: List<Card>) {
+        val widgetCards = cards.take(20).map { card ->
+            com.lessapp.less.widget.WidgetCard(
+                id = card.id,
+                title = card.title,
+                topic = card.topic,
+                hook = card.hook
+            )
+        }
+        com.lessapp.less.widget.LessWidgetProvider.saveCardsForWidget(context, widgetCards, lang.code)
     }
 
     suspend fun clear(lang: Lang) {

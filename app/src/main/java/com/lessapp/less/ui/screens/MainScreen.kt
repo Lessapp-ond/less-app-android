@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     activity: Activity,
+    openDailyMode: Boolean = false,
     viewModel: FeedViewModel = viewModel()
 ) {
     val feedItems by viewModel.feedItems.collectAsState()
@@ -66,6 +67,10 @@ fun MainScreen(
     // Load cards on first launch
     LaunchedEffect(Unit) {
         viewModel.loadCards()
+        // Open daily mode if launched from widget
+        if (openDailyMode) {
+            viewModel.enterDailyMode()
+        }
     }
 
     // Show onboarding if not seen
