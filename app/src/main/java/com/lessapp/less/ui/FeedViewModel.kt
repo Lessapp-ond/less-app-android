@@ -456,10 +456,13 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun updateDailyProgress() {
-        // Progress is now tracked via dailySessionViewedIds in cardBecameVisible
-        // This is kept for compatibility but may be called during mode switches
         val listMode = ListMode.fromValue(_settings.value.listMode)
         if (listMode == ListMode.DAILY) {
+            // Restore progress from persisted data (handles app restart/mode switch)
+            val viewedToday = dailyRepo.getViewedCardsToday()
+            dailySessionViewedIds.clear()
+            dailySessionViewedIds.addAll(viewedToday)
+            _dailyProgress.value = viewedToday.size
             _isDailyComplete.value = dailyRepo.isCompleteToday()
         }
     }
@@ -469,9 +472,11 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             settingsRepo.updateListMode(ListMode.DAILY)
             sessionOrderCache = emptyList()
 
-            // Reset session tracking
+            // Restore progress from persisted data (handles cross-session viewing)
+            val viewedToday = dailyRepo.getViewedCardsToday()
             dailySessionViewedIds.clear()
-            _dailyProgress.value = 0
+            dailySessionViewedIds.addAll(viewedToday)
+            _dailyProgress.value = viewedToday.size
             _isDailyComplete.value = dailyRepo.isCompleteToday()
 
             rebuildFeed()
@@ -506,12 +511,12 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
 
-                // Update progress based on session views (not persisted count)
-                val sessionContentViews = dailySessionViewedIds.size
-                _dailyProgress.value = sessionContentViews
+                // Update progress based on total cards viewed today (persisted across sessions)
+                val totalViewedToday = dailyRepo.viewedCount()
+                _dailyProgress.value = totalViewedToday
 
-                // Check if daily is complete (all 5 content cards viewed in THIS session)
-                if (sessionContentViews >= 5 && !_isDailyComplete.value) {
+                // Check if daily is complete (all 5 content cards viewed today)
+                if (totalViewedToday >= 5 && !_isDailyComplete.value) {
                     dailyRepo.markDailyCompleted()
                     streakRepo.recordCompletion()
                     _currentStreak.value = streakRepo.getCurrentStreak()
@@ -562,12 +567,12 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                 dailyRepo.markCardViewed(cardId)
             }
 
-            // Update progress
-            val sessionContentViews = dailySessionViewedIds.size
-            _dailyProgress.value = sessionContentViews
+            // Update progress based on total cards viewed today (persisted)
+            val totalViewedToday = dailyRepo.viewedCount()
+            _dailyProgress.value = totalViewedToday
 
-            // Check completion
-            if (sessionContentViews >= 5 && !_isDailyComplete.value) {
+            // Check completion (all 5 content cards viewed today)
+            if (totalViewedToday >= 5 && !_isDailyComplete.value) {
                 dailyRepo.markDailyCompleted()
                 streakRepo.recordCompletion()
                 _currentStreak.value = streakRepo.getCurrentStreak()

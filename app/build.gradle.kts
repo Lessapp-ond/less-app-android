@@ -14,6 +14,13 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(keystorePropertiesFile.inputStream())
 }
 
+// Load secrets (API keys)
+val secretsPropertiesFile = rootProject.file("secrets.properties")
+val secretsProperties = Properties()
+if (secretsPropertiesFile.exists()) {
+    secretsProperties.load(secretsPropertiesFile.inputStream())
+}
+
 android {
     namespace = "com.lessapp.less"
     compileSdk = 35
@@ -33,13 +40,17 @@ android {
         applicationId = "com.lessapp.less"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.0.7"
+        versionCode = 9
+        versionName = "1.0.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Inject secrets into BuildConfig (loaded from secrets.properties)
+        buildConfigField("String", "SUPABASE_URL", "\"${secretsProperties.getProperty("SUPABASE_URL", "")}\"")
+        buildConfigField("String", "SUPABASE_KEY", "\"${secretsProperties.getProperty("SUPABASE_KEY", "")}\"")
     }
 
     buildTypes {
@@ -62,6 +73,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.6"

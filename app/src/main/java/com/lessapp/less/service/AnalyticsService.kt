@@ -2,6 +2,7 @@ package com.lessapp.less.service
 
 import android.content.Context
 import android.util.Log
+import com.lessapp.less.BuildConfig
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.lessapp.less.data.model.Lang
@@ -21,8 +22,9 @@ import java.net.URL
 object AnalyticsService {
 
     private const val TAG = "AnalyticsService"
-    private const val SUPABASE_URL = "https://aqbzyeepanngwgbjwoqy.supabase.co"
-    private const val SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxYnp5ZWVwYW5uZ3dnYmp3b3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjc2NDUsImV4cCI6MjA4MzMwMzY0NX0.FAWlbkmKCgZaYx666Egtl-gu_TQoccl_PIKa8Td1SZU"
+    // Loaded from secrets.properties via BuildConfig
+    private val SUPABASE_URL = BuildConfig.SUPABASE_URL
+    private val SUPABASE_KEY = BuildConfig.SUPABASE_KEY
 
     private val PENDING_EVENTS_KEY = stringPreferencesKey("pending_analytics_v1")
 

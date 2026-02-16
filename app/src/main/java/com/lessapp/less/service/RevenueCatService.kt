@@ -1,6 +1,8 @@
 package com.lessapp.less.service
 
 import android.app.Application
+import android.util.Log
+import com.lessapp.less.BuildConfig
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesConfiguration
 import com.revenuecat.purchases.models.StoreTransaction
@@ -16,6 +18,7 @@ import kotlin.coroutines.resume
 
 object RevenueCatService {
 
+    private const val TAG = "RevenueCat"
     private const val API_KEY = "goog_YOUR_ANDROID_REVENUECAT_KEY" // Replace with Android key from RevenueCat dashboard
 
     // Product IDs (same as iOS)
@@ -28,16 +31,21 @@ object RevenueCatService {
     fun configure(application: Application) {
         if (isConfigured) return
         if (API_KEY == "goog_YOUR_ANDROID_REVENUECAT_KEY") {
-            println("RevenueCat: API key not configured")
+            if (BuildConfig.DEBUG) Log.d(TAG, "API key not configured")
             return
         }
 
-        Purchases.logLevel = com.revenuecat.purchases.LogLevel.DEBUG
+        // Only enable debug logging in debug builds
+        Purchases.logLevel = if (BuildConfig.DEBUG) {
+            com.revenuecat.purchases.LogLevel.DEBUG
+        } else {
+            com.revenuecat.purchases.LogLevel.ERROR
+        }
         Purchases.configure(
             PurchasesConfiguration.Builder(application, API_KEY).build()
         )
         isConfigured = true
-        println("RevenueCat: Configured successfully")
+        if (BuildConfig.DEBUG) Log.d(TAG, "Configured successfully")
     }
 
     suspend fun fetchOfferings(): Offerings? {
@@ -52,7 +60,7 @@ object RevenueCatService {
                 }
 
                 override fun onError(error: PurchasesError) {
-                    println("RevenueCat: Failed to fetch offerings: ${error.message}")
+                    Log.e(TAG, "Failed to fetch offerings: ${error.message}")
                     if (continuation.isActive) {
                         continuation.resume(null)
                     }
@@ -70,7 +78,7 @@ object RevenueCatService {
                 purchaseParams,
                 object : PurchaseCallback {
                     override fun onCompleted(storeTransaction: StoreTransaction, customerInfo: CustomerInfo) {
-                        println("RevenueCat: Purchase successful")
+                        if (BuildConfig.DEBUG) Log.d(TAG, "Purchase successful")
                         if (continuation.isActive) {
                             continuation.resume(true)
                         }
@@ -78,9 +86,9 @@ object RevenueCatService {
 
                     override fun onError(error: PurchasesError, userCancelled: Boolean) {
                         if (userCancelled) {
-                            println("RevenueCat: Purchase cancelled by user")
+                            if (BuildConfig.DEBUG) Log.d(TAG, "Purchase cancelled by user")
                         } else {
-                            println("RevenueCat: Purchase error: ${error.message}")
+                            Log.e(TAG, "Purchase error: ${error.message}")
                         }
                         if (continuation.isActive) {
                             continuation.resume(false)
@@ -97,14 +105,14 @@ object RevenueCatService {
         return suspendCancellableCoroutine { continuation ->
             Purchases.sharedInstance.restorePurchases(object : com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback {
                 override fun onReceived(customerInfo: CustomerInfo) {
-                    println("RevenueCat: Restored purchases")
+                    if (BuildConfig.DEBUG) Log.d(TAG, "Restored purchases")
                     if (continuation.isActive) {
                         continuation.resume(true)
                     }
                 }
 
                 override fun onError(error: PurchasesError) {
-                    println("RevenueCat: Restore failed: ${error.message}")
+                    Log.e(TAG, "Restore failed: ${error.message}")
                     if (continuation.isActive) {
                         continuation.resume(false)
                     }
