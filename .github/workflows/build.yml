@@ -28,6 +28,11 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> keystore.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> keystore.properties
 
+      - name: Create secrets.properties
+        run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > secrets.properties
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> secrets.properties
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
