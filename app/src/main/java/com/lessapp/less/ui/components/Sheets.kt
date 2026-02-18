@@ -3,6 +3,7 @@ package com.lessapp.less.ui.components
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
@@ -819,6 +820,153 @@ fun NumberPicker(
             onClick = { if (value > range.first) onValueChange(value - 1) }
         ) {
             Text("▼", fontSize = 18.sp)
+        }
+    }
+}
+
+// MARK: - Card Detail Sheet (for long content)
+@Composable
+fun CardDetailSheet(
+    card: Card,
+    l10n: L10n,
+    isLearned: Boolean,
+    onLearnedClick: () -> Unit,
+    onShareClick: () -> Unit,
+    onMenuClick: () -> Unit,
+    onClose: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.9f)
+    ) {
+        // Fixed Header
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(top = 8.dp, bottom = 12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = card.topic.uppercase(),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black.copy(alpha = 0.5f)
+                )
+
+                IconButton(onClick = onMenuClick) {
+                    Text(
+                        text = "•••",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.Black.copy(alpha = 0.7f)
+                    )
+                }
+            }
+
+            Text(
+                text = card.title,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Black
+            )
+        }
+
+        // Scrollable Content
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+        ) {
+            Text(
+                text = card.hook,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black.copy(alpha = 0.75f)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Bullets
+            card.bullets.forEach { bullet ->
+                Text(
+                    text = "• $bullet",
+                    fontSize = 16.sp,
+                    color = Color.Black.copy(alpha = 0.85f),
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Why it matters
+            Text(
+                text = "💡 ${l10n.whyItMatters}",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "→ ${card.why}",
+                fontSize = 15.sp,
+                color = Color.Black.copy(alpha = 0.7f)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "${card.topic.uppercase()} · ${l10n.difficulty(card.difficulty)}",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black.copy(alpha = 0.5f)
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // Fixed Footer - Actions
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 32.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Button(
+                onClick = onLearnedClick,
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isLearned) Color.Black else Color.White,
+                    contentColor = if (isLearned) Color.White else Color.Black
+                ),
+                border = if (!isLearned) ButtonDefaults.outlinedButtonBorder else null,
+                shape = RoundedCornerShape(999.dp)
+            ) {
+                Text(
+                    text = l10n.learned,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Surface(
+                onClick = onShareClick,
+                shape = RoundedCornerShape(999.dp),
+                color = Color.White,
+                border = ButtonDefaults.outlinedButtonBorder
+            ) {
+                Text(
+                    text = "↗",
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+            }
         }
     }
 }

@@ -45,7 +45,8 @@ fun CardView(
     onShareClick: () -> Unit,
     onFavoriteClick: () -> Unit,
     onSwipeRight: () -> Unit,
-    onSwipeLeft: () -> Unit
+    onSwipeLeft: () -> Unit,
+    onCardTap: () -> Unit = {}
 ) {
     var offsetX by remember { mutableFloatStateOf(0f) }
     val scale = textScale.factor
@@ -87,6 +88,7 @@ fun CardView(
 
         // Card content
         Surface(
+            onClick = onCardTap,
             modifier = Modifier
                 .fillMaxWidth()
                 .offset { IntOffset(offsetX.roundToInt(), 0) }

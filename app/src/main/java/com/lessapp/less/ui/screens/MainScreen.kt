@@ -65,6 +65,9 @@ fun MainScreen(
     val scope = rememberCoroutineScope()
     val colors = AppColors.forDarkMode(settings.darkMode)
 
+    // Card detail sheet state
+    var selectedCardForDetail by remember { mutableStateOf<Card?>(null) }
+
     // Load cards on first launch
     LaunchedEffect(Unit) {
         viewModel.loadCards()
@@ -227,7 +230,8 @@ fun MainScreen(
                                         viewModel.toggleLearned(item.card.id)
                                         isLearned = !isLearned
                                     },
-                                    onSwipeLeft = { viewModel.toggleUnuseful(item.card.id) }
+                                    onSwipeLeft = { viewModel.toggleUnuseful(item.card.id) },
+                                    onCardTap = { selectedCardForDetail = item.card }
                                 )
                             }
                             is FeedItem.System -> {
@@ -433,6 +437,34 @@ fun MainScreen(
             DonationSheet(
                 l10n = l10n,
                 onClose = { viewModel.setShowDonation(false) }
+            )
+        }
+    }
+
+    // Card Detail Sheet (for long content)
+    selectedCardForDetail?.let { card ->
+        ModalBottomSheet(
+            onDismissRequest = { selectedCardForDetail = null }
+        ) {
+            var isLearned by remember { mutableStateOf(false) }
+            LaunchedEffect(card.id) {
+                isLearned = viewModel.isLearned(card.id)
+            }
+            CardDetailSheet(
+                card = card,
+                l10n = l10n,
+                isLearned = isLearned,
+                onLearnedClick = {
+                    viewModel.toggleLearned(card.id)
+                    isLearned = !isLearned
+                },
+                onShareClick = { CardShareHelper.shareCard(activity, card, l10n) },
+                onMenuClick = {
+                    selectedCardForDetail = null
+                    viewModel.setSelectedCardId(card.id)
+                    viewModel.setShowCardMenu(true)
+                },
+                onClose = { selectedCardForDetail = null }
             )
         }
     }
