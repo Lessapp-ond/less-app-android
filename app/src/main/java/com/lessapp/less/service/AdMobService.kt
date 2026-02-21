@@ -32,12 +32,24 @@ object AdMobService {
 
     private var rewardedAd: RewardedAd? = null
     private var isLoading = false
+    private var isInitialized = false
 
     fun initialize(context: Context) {
-        MobileAds.initialize(context) { }
+        MobileAds.initialize(context) {
+            isInitialized = true
+        }
     }
 
     suspend fun loadRewardedAd(context: Context): Boolean {
+        // Wait for SDK initialization (max 5 seconds)
+        if (!isInitialized) {
+            repeat(50) {
+                if (isInitialized) return@repeat
+                kotlinx.coroutines.delay(100)
+            }
+            if (!isInitialized) return false
+        }
+
         if (isLoading) return false
         if (rewardedAd != null) return true
 

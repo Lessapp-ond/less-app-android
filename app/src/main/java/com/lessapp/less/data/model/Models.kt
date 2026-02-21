@@ -79,8 +79,7 @@ data class SystemCard(
     val why: String,
     val supportTitle: String,
     val supportText: String,
-    val ctaVideo: String,
-    val ctaDonate: String
+    val ctaVideo: String
 ) {
     companion object {
         fun forLang(lang: Lang): SystemCard {
@@ -95,8 +94,7 @@ data class SystemCard(
                     why = "LESS est gratuit et sans compte. Pour continuer, tu peux nous soutenir.",
                     supportTitle = "Soutenir LESS",
                     supportText = "Aide-nous à garder l'app gratuite et sans pub intrusive.",
-                    ctaVideo = "Regarder une courte vidéo",
-                    ctaDonate = "Faire un don"
+                    ctaVideo = "Regarder une courte vidéo"
                 )
                 Lang.ES -> SystemCard(
                     title = "Tu cerebro ya hizo su parte",
@@ -108,8 +106,7 @@ data class SystemCard(
                     why = "LESS es gratis y sin cuenta. Para continuar, puedes apoyarnos.",
                     supportTitle = "Apoyar LESS",
                     supportText = "Ayúdanos a mantener la app gratis y sin publicidad intrusiva.",
-                    ctaVideo = "Ver un video corto",
-                    ctaDonate = "Hacer una donación"
+                    ctaVideo = "Ver un video corto"
                 )
                 Lang.EN -> SystemCard(
                     title = "Your brain has done its part",
@@ -121,8 +118,7 @@ data class SystemCard(
                     why = "LESS is free and account-free. To keep going, you can support us.",
                     supportTitle = "Support LESS",
                     supportText = "Help us keep the app free and without intrusive ads.",
-                    ctaVideo = "Watch a short video",
-                    ctaDonate = "Make a donation"
+                    ctaVideo = "Watch a short video"
                 )
             }
         }

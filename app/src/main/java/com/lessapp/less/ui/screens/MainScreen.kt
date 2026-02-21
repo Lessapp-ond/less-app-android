@@ -46,7 +46,6 @@ fun MainScreen(
     val showHelp by viewModel.showHelp.collectAsState()
     val showCardMenu by viewModel.showCardMenu.collectAsState()
     val showFeedback by viewModel.showFeedback.collectAsState()
-    val showDonation by viewModel.showDonation.collectAsState()
     val showSettings by viewModel.showSettings.collectAsState()
     val selectedCardId by viewModel.selectedCardId.collectAsState()
     val undoToast by viewModel.undoToast.collectAsState()
@@ -64,6 +63,9 @@ fun MainScreen(
     val pagerState = rememberPagerState(pageCount = { maxOf(1, feedItems.size) })
     val scope = rememberCoroutineScope()
     val colors = AppColors.forDarkMode(settings.darkMode)
+
+    // Card detail sheet state
+    var selectedCardForDetail by remember { mutableStateOf<Card?>(null) }
 
     // Load cards on first launch
     LaunchedEffect(Unit) {
@@ -227,7 +229,8 @@ fun MainScreen(
                                         viewModel.toggleLearned(item.card.id)
                                         isLearned = !isLearned
                                     },
-                                    onSwipeLeft = { viewModel.toggleUnuseful(item.card.id) }
+                                    onSwipeLeft = { viewModel.toggleUnuseful(item.card.id) },
+                                    onCardTap = { selectedCardForDetail = item.card }
                                 )
                             }
                             is FeedItem.System -> {
@@ -239,8 +242,7 @@ fun MainScreen(
                                         scope.launch {
                                             viewModel.watchVideo(activity)
                                         }
-                                    },
-                                    onDonate = { viewModel.openDonation() }
+                                    }
                                 )
                             }
                             is FeedItem.Opening -> {
@@ -340,7 +342,9 @@ fun MainScreen(
                 onNotificationTimeChange = { hour, minute -> viewModel.setNotificationTime(hour, minute) },
                 onSupportClick = {
                     viewModel.setShowSettings(false)
-                    viewModel.setShowDonation(true)
+                    scope.launch {
+                        viewModel.watchVideo(activity)
+                    }
                 },
                 onClose = { viewModel.setShowSettings(false) }
             )
@@ -425,14 +429,30 @@ fun MainScreen(
         )
     }
 
-    // Donation Sheet
-    if (showDonation) {
+    // Card Detail Sheet (for long content)
+    selectedCardForDetail?.let { card ->
         ModalBottomSheet(
-            onDismissRequest = { viewModel.setShowDonation(false) }
+            onDismissRequest = { selectedCardForDetail = null }
         ) {
-            DonationSheet(
+            var isLearned by remember { mutableStateOf(false) }
+            LaunchedEffect(card.id) {
+                isLearned = viewModel.isLearned(card.id)
+            }
+            CardDetailSheet(
+                card = card,
                 l10n = l10n,
-                onClose = { viewModel.setShowDonation(false) }
+                isLearned = isLearned,
+                onLearnedClick = {
+                    viewModel.toggleLearned(card.id)
+                    isLearned = !isLearned
+                },
+                onShareClick = { CardShareHelper.shareCard(activity, card, l10n) },
+                onMenuClick = {
+                    selectedCardForDetail = null
+                    viewModel.setSelectedCardId(card.id)
+                    viewModel.setShowCardMenu(true)
+                },
+                onClose = { selectedCardForDetail = null }
             )
         }
     }
