@@ -276,8 +276,7 @@ fun SystemCardView(
     card: SystemCard,
     textScale: TextScale,
     isDark: Boolean = false,
-    onWatchVideo: () -> Unit,
-    onDonate: () -> Unit
+    onWatchVideo: () -> Unit
 ) {
     val scale = textScale.factor
     val colors = AppColors.forDarkMode(isDark)
@@ -339,38 +338,20 @@ fun SystemCardView(
             )
             Spacer(modifier = Modifier.height(14.dp))
 
-            Row(
+            Button(
+                onClick = onWatchVideo,
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.buttonBackgroundActive,
+                    contentColor = colors.buttonTextActive
+                ),
+                shape = RoundedCornerShape(999.dp)
             ) {
-                Button(
-                    onClick = onWatchVideo,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.buttonBackgroundActive,
-                        contentColor = colors.buttonTextActive
-                    ),
-                    shape = RoundedCornerShape(999.dp)
-                ) {
-                    Text(
-                        text = card.ctaVideo,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                OutlinedButton(
-                    onClick = onDonate,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(999.dp)
-                ) {
-                    Text(
-                        text = card.ctaDonate,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.buttonText
-                    )
-                }
+                Text(
+                    text = card.ctaVideo,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

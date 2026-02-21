@@ -40,8 +40,8 @@ android {
         applicationId = "com.lessapp.less"
         minSdk = 26
         targetSdk = 35
-        versionCode = 10
-        versionName = "1.0.9"
+        versionCode = 11
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -118,9 +118,6 @@ dependencies {
 
     // Google Mobile Ads (AdMob)
     implementation("com.google.android.gms:play-services-ads:22.6.0")
-
-    // RevenueCat
-    implementation("com.revenuecat.purchases:purchases:7.0.0")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

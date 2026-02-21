@@ -46,7 +46,6 @@ fun MainScreen(
     val showHelp by viewModel.showHelp.collectAsState()
     val showCardMenu by viewModel.showCardMenu.collectAsState()
     val showFeedback by viewModel.showFeedback.collectAsState()
-    val showDonation by viewModel.showDonation.collectAsState()
     val showSettings by viewModel.showSettings.collectAsState()
     val selectedCardId by viewModel.selectedCardId.collectAsState()
     val undoToast by viewModel.undoToast.collectAsState()
@@ -243,8 +242,7 @@ fun MainScreen(
                                         scope.launch {
                                             viewModel.watchVideo(activity)
                                         }
-                                    },
-                                    onDonate = { viewModel.openDonation() }
+                                    }
                                 )
                             }
                             is FeedItem.Opening -> {
@@ -344,7 +342,9 @@ fun MainScreen(
                 onNotificationTimeChange = { hour, minute -> viewModel.setNotificationTime(hour, minute) },
                 onSupportClick = {
                     viewModel.setShowSettings(false)
-                    viewModel.setShowDonation(true)
+                    scope.launch {
+                        viewModel.watchVideo(activity)
+                    }
                 },
                 onClose = { viewModel.setShowSettings(false) }
             )
@@ -427,18 +427,6 @@ fun MainScreen(
                 }
             }
         )
-    }
-
-    // Donation Sheet
-    if (showDonation) {
-        ModalBottomSheet(
-            onDismissRequest = { viewModel.setShowDonation(false) }
-        ) {
-            DonationSheet(
-                l10n = l10n,
-                onClose = { viewModel.setShowDonation(false) }
-            )
-        }
     }
 
     // Card Detail Sheet (for long content)

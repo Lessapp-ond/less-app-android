@@ -403,8 +403,8 @@ fun SettingsSheet(
         Spacer(modifier = Modifier.height(8.dp))
         TextButton(onClick = onSupportClick) {
             Text(
-                text = "❤️ ${l10n.supportUs}",
-                color = Color.Red,
+                text = "▶️ ${l10n.supportUs}",
+                color = Color.Blue,
                 fontWeight = FontWeight.SemiBold
             )
         }

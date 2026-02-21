@@ -148,7 +148,7 @@ class L10n(val lang: Lang) {
     val settings get() = t("Réglages", "Settings", "Ajustes")
     val appearance get() = t("Apparence", "Appearance", "Apariencia")
     val support get() = t("Soutenir", "Support", "Apoyar")
-    val supportUs get() = t("Nous soutenir", "Support us", "Apóyanos")
+    val supportUs get() = t("Regarder une vidéo", "Watch a video", "Ver un video")
     val done get() = t("OK", "Done", "Listo")
 
     // Statistics
